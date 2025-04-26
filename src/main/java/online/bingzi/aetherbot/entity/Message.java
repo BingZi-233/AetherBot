@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import online.bingzi.aetherbot.enums.MessageType;
 import org.hibernate.annotations.Comment;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -70,9 +71,9 @@ public class Message {
     /**
      * CA消费
      */
-    @Column
+    @Column(precision = 19, scale = 9)
     @Comment("消耗的CA币")
-    private Double caCost;
+    private BigDecimal caCost;
 
     /**
      * 是否为错误消息

@@ -41,21 +41,21 @@ public class AiModel {
     /**
      * 每千提问Token的CA费用
      */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 9)
     @Comment("每千提问Token的CA费用")
     private BigDecimal promptCostPerThousandTokens;
 
     /**
      * 每千回答Token的CA费用
      */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 9)
     @Comment("每千回答Token的CA费用")
     private BigDecimal completionCostPerThousandTokens;
 
     /**
      * 费用倍率
      */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 9)
     @Comment("费用倍率，默认1.1")
     private BigDecimal multiplier = new BigDecimal("1.1");
 

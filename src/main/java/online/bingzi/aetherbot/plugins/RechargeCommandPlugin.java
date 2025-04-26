@@ -125,7 +125,7 @@ public class RechargeCommandPlugin {
             User targetUser = userService.findByQQ(targetQQ);
 
             // 记录旧余额用于显示
-            BigDecimal oldBalance = new BigDecimal(String.valueOf(targetUser.getCaBalance()));
+            BigDecimal oldBalance = targetUser.getCaBalance();
             
             // 进行充值
             targetUser = userService.updateCaBalance(targetUser, amount);
@@ -133,7 +133,7 @@ public class RechargeCommandPlugin {
             // 记录交易
             CaTransaction transaction = new CaTransaction();
             transaction.setUser(targetUser);
-            transaction.setAmount(amount.doubleValue());
+            transaction.setAmount(amount);
             transaction.setType(TransactionType.RECHARGE);
 
             if (!operatorQQ.equals(targetQQ)) {
@@ -151,7 +151,7 @@ public class RechargeCommandPlugin {
                     .text("用户: " + targetQQ + "\n")
                     .text("充值金额: " + amount.toPlainString() + " CA\n")
                     .text("充值前余额: " + oldBalance.toPlainString() + " CA\n")
-                    .text("当前余额: " + new BigDecimal(String.valueOf(targetUser.getCaBalance())).toPlainString() + " CA")
+                    .text("当前余额: " + targetUser.getCaBalance().toPlainString() + " CA")
                     .build();
 
             sendResponse(bot, senderId, groupId, successMsg);
@@ -161,7 +161,7 @@ public class RechargeCommandPlugin {
                 String notifyMsg = MsgUtils.builder()
                         .text("您收到一笔CA代币充值！\n")
                         .text("充值金额: " + amount.toPlainString() + " CA\n")
-                        .text("当前余额: " + new BigDecimal(String.valueOf(targetUser.getCaBalance())).toPlainString() + " CA\n")
+                        .text("当前余额: " + targetUser.getCaBalance().toPlainString() + " CA\n")
                         .text("充值时间: " + transaction.getCreateTime())
                         .build();
 

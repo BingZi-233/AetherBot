@@ -142,7 +142,7 @@ public class ChatEventListener {
                 .divide(divisor, 9, RoundingMode.HALF_UP)
                 .multiply(multiplier);
                 
-            aiMessage.setCaCost(caCost.doubleValue());
+            aiMessage.setCaCost(caCost);
         }
         
         messageRepository.save(aiMessage);
@@ -176,7 +176,7 @@ public class ChatEventListener {
         // 记录CA交易
         CaTransaction transaction = new CaTransaction();
         transaction.setUser(user);
-        transaction.setAmount(actualCost.negate().doubleValue());
+        transaction.setAmount(actualCost.negate());
         transaction.setType(TransactionType.CONSUME);
         
         // 添加token使用量到交易描述中（如果有）

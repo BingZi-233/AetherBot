@@ -16,6 +16,7 @@ import online.bingzi.aetherbot.repository.CaTransactionRepository;
 import online.bingzi.aetherbot.service.UserService;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -91,7 +92,7 @@ public class BalanceCommandPlugin {
 
                 for (int i = 0; i < recentTransactions.size(); i++) {
                     CaTransaction transaction = recentTransactions.get(i);
-                    String amountText = transaction.getAmount() > 0 ?
+                    String amountText = transaction.getAmount().compareTo(BigDecimal.ZERO) > 0 ?
                             "+" + String.format("%.9f", transaction.getAmount()) :
                             String.format("%.9f", transaction.getAmount());
 

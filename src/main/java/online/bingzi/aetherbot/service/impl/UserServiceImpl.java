@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Service
@@ -32,9 +33,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User updateCaBalance(User user, BigDecimal amount) {
-        BigDecimal currentBalance = new BigDecimal(String.valueOf(user.getCaBalance()));
-        BigDecimal newBalance = currentBalance.add(amount);
-        user.setCaBalance(newBalance.doubleValue());
+        BigDecimal currentBalance = user.getCaBalance();
+        BigDecimal newBalance = currentBalance.add(amount).setScale(9, RoundingMode.HALF_UP);
+        user.setCaBalance(newBalance);
         user.setUpdateTime(LocalDateTime.now());
         return userRepository.save(user);
     }
@@ -71,7 +72,7 @@ public class UserServiceImpl implements UserService {
     private User createNewUser(String qq) {
         User newUser = new User();
         newUser.setQq(qq);
-        newUser.setCaBalance(0.0);
+        newUser.setCaBalance(BigDecimal.ZERO);
         newUser.setStatus(UserStatus.NORMAL);
 
         // 检查QQ是否在管理员列表中，设置对应角色

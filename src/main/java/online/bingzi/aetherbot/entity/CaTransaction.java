@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import online.bingzi.aetherbot.enums.TransactionType;
 import org.hibernate.annotations.Comment;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -40,9 +41,9 @@ public class CaTransaction {
     /**
      * 交易金额
      */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 9)
     @Comment("交易金额")
-    private Double amount;
+    private BigDecimal amount;
 
     /**
      * 交易类型

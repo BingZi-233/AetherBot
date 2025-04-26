@@ -21,6 +21,7 @@ import online.bingzi.aetherbot.repository.MessageRepository;
 import online.bingzi.aetherbot.service.UserService;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -145,11 +146,11 @@ public class HistoryCommandPlugin {
                 for (Conversation conversation : pageConversations) {
                     // 获取对话相关的交易记录并计算总花费
                     List<CaTransaction> transactions = caTransactionRepository.findByRelatedConversation(conversation);
-                    double totalCost = transactions.stream()
-                            .mapToDouble(CaTransaction::getAmount)
-                            .sum();
+                    BigDecimal totalCost = transactions.stream()
+                            .map(CaTransaction::getAmount)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
                     // 由于消费是负数，取绝对值显示
-                    double displayCost = Math.abs(totalCost);
+                    BigDecimal displayCost = totalCost.abs();
 
                     msgBuilder.text(index + ". 模型: " + conversation.getAiModel().getName() + "\n")
                             .text("   时间: " + conversation.getCreateTime().format(FORMATTER) + "\n")

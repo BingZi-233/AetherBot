@@ -8,6 +8,7 @@ import online.bingzi.aetherbot.enums.UserRole;
 import online.bingzi.aetherbot.enums.UserStatus;
 import org.hibernate.annotations.Comment;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -47,9 +48,9 @@ public class User {
     /**
      * CA余额
      */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 9)
     @Comment("CA余额")
-    private Double caBalance = 0.0;
+    private BigDecimal caBalance = BigDecimal.ZERO;
 
     /**
      * 用户状态
