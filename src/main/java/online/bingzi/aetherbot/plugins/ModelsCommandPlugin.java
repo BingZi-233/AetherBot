@@ -14,7 +14,9 @@ import online.bingzi.aetherbot.entity.AiModel;
 import online.bingzi.aetherbot.service.AiModelService;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 /**
  * AI模型列表查询指令插件
@@ -27,27 +29,54 @@ import java.util.List;
 public class ModelsCommandPlugin {
 
     private final AiModelService aiModelService;
+    
+    // 每页显示的模型数量
+    private static final int PAGE_SIZE = 5;
 
     /**
      * 处理私聊模型列表查询指令
-     * 格式: @models
+     * 格式: @models [页码]，默认第1页
      */
     @PrivateMessageHandler
-    @MessageHandlerFilter(cmd = "^@models$")
-    public void handlePrivateModels(Bot bot, PrivateMessageEvent event) {
+    @MessageHandlerFilter(cmd = "^@models(?:\\s+(\\d+))?$")
+    public void handlePrivateModels(Bot bot, PrivateMessageEvent event, Matcher matcher) {
+        // 提取页码参数，默认为1
+        int page = 1;
+        if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
+            try {
+                page = Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException e) {
+                // 忽略无效页码，使用默认值1
+            }
+        }
+        
+        if (page < 1) page = 1;
+        
         // 处理模型列表查询请求
-        processModelsRequest(bot, event.getUserId(), null);
+        processModelsRequest(bot, event.getUserId(), null, page);
     }
 
     /**
      * 处理群聊模型列表查询指令
-     * 格式: @models
+     * 格式: @models [页码]，默认第1页
      */
     @GroupMessageHandler
-    @MessageHandlerFilter(cmd = "^@models$")
-    public void handleGroupModels(Bot bot, GroupMessageEvent event) {
+    @MessageHandlerFilter(cmd = "^@models(?:\\s+(\\d+))?$")
+    public void handleGroupModels(Bot bot, GroupMessageEvent event, Matcher matcher) {
+        // 提取页码参数，默认为1
+        int page = 1;
+        if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
+            try {
+                page = Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException e) {
+                // 忽略无效页码，使用默认值1
+            }
+        }
+        
+        if (page < 1) page = 1;
+        
         // 处理模型列表查询请求
-        processModelsRequest(bot, event.getUserId(), event.getGroupId());
+        processModelsRequest(bot, event.getUserId(), event.getGroupId(), page);
     }
 
     /**
@@ -56,22 +85,40 @@ public class ModelsCommandPlugin {
      * @param bot      机器人实例
      * @param senderId 发送者ID
      * @param groupId  群ID，如果是私聊则为null
+     * @param page     当前页码，从1开始计数
      */
-    private void processModelsRequest(Bot bot, long senderId, Long groupId) {
+    private void processModelsRequest(Bot bot, long senderId, Long groupId, int page) {
         try {
             // 获取所有可用的AI模型
-            List<AiModel> models = aiModelService.getAvailableModels();
+            List<AiModel> allModels = aiModelService.getAvailableModels();
+
+            // 手动分页
+            int totalItems = allModels.size();
+            int totalPages = (int) Math.ceil((double) totalItems / PAGE_SIZE);
+
+            // 如果请求的页码超出了总页数，则使用最后一页
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+            }
+
+            // 计算当前页的开始和结束索引
+            int fromIndex = (page - 1) * PAGE_SIZE;
+            int toIndex = Math.min(fromIndex + PAGE_SIZE, totalItems);
+
+            List<AiModel> pageModels = fromIndex < toIndex
+                    ? allModels.subList(fromIndex, toIndex)
+                    : new ArrayList<>();
 
             // 构建模型列表信息
             MsgUtils msgBuilder = MsgUtils.builder()
-                    .text("可用AI模型列表\n")
+                    .text("可用AI模型列表 (第" + page + "页/共" + totalPages + "页)\n")
                     .text("====================\n");
 
-            if (models.isEmpty()) {
+            if (pageModels.isEmpty()) {
                 msgBuilder.text("暂无可用模型");
             } else {
-                for (int i = 0; i < models.size(); i++) {
-                    AiModel model = models.get(i);
+                for (int i = 0; i < pageModels.size(); i++) {
+                    AiModel model = pageModels.get(i);
 
                     msgBuilder.text("■ " + model.getName() + "\n");
 
@@ -84,13 +131,29 @@ public class ModelsCommandPlugin {
                     }
 
                     // 如果不是最后一个模型，则添加分隔线
-                    if (i < models.size() - 1) {
+                    if (i < pageModels.size() - 1) {
                         msgBuilder.text("--------------------\n");
                     }
                 }
 
+                // 添加分页提示和使用说明
+                msgBuilder.text("\n");
+                
+                // 如果有多个页面，显示分页导航提示
+                if (totalPages > 1) {
+                    if (page > 1) {
+                        msgBuilder.text("◀ 上一页: @models " + (page - 1) + "\n");
+                    }
+                    
+                    if (page < totalPages) {
+                        msgBuilder.text("▶ 下一页: @models " + (page + 1) + "\n");
+                    }
+                    
+                    msgBuilder.text("\n");
+                }
+                
                 // 添加使用说明
-                msgBuilder.text("\n使用方法: @chat [模型名称] [问题内容]");
+                msgBuilder.text("使用方法: @chat [模型名称] [问题内容]");
             }
 
             String modelsInfo = msgBuilder.build();
