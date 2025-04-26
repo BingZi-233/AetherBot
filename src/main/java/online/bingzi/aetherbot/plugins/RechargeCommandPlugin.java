@@ -146,9 +146,9 @@ public class RechargeCommandPlugin {
             String successMsg = MsgUtils.builder()
                     .text("充值成功！\n")
                     .text("用户: " + targetQQ + "\n")
-                    .text("充值金额: " + amount + " CA\n")
-                    .text("充值前余额: " + oldBalance + " CA\n")
-                    .text("当前余额: " + targetUser.getCaBalance() + " CA")
+                    .text("充值金额: " + String.format("%.9f", amount) + " CA\n")
+                    .text("充值前余额: " + String.format("%.9f", oldBalance) + " CA\n")
+                    .text("当前余额: " + String.format("%.9f", targetUser.getCaBalance()) + " CA")
                     .build();
             
             sendResponse(bot, senderId, groupId, successMsg);
@@ -157,8 +157,8 @@ public class RechargeCommandPlugin {
             if (!operatorQQ.equals(targetQQ)) {
                 String notifyMsg = MsgUtils.builder()
                         .text("您收到一笔CA代币充值！\n")
-                        .text("充值金额: " + amount + " CA\n")
-                        .text("当前余额: " + targetUser.getCaBalance() + " CA\n")
+                        .text("充值金额: " + String.format("%.9f", amount) + " CA\n")
+                        .text("当前余额: " + String.format("%.9f", targetUser.getCaBalance()) + " CA\n")
                         .text("充值时间: " + transaction.getCreateTime())
                         .build();
                 

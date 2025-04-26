@@ -133,8 +133,8 @@ public class ChatCommandPlugin {
             if (user.getCaBalance() < cost) {
                 String errorMsg = MsgUtils.builder()
                         .text("CA代币余额不足！")
-                        .text("\n当前余额: " + user.getCaBalance())
-                        .text("\n本次需要: " + cost)
+                        .text("\n当前余额: " + String.format("%.9f", user.getCaBalance()))
+                        .text("\n本次需要: " + String.format("%.9f", cost))
                         .build();
                 
                 sendResponse(bot, senderId, groupId, errorMsg);

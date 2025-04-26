@@ -84,7 +84,7 @@ public class BalanceCommandPlugin {
             MsgUtils msgBuilder = MsgUtils.builder()
                     .text("CA代币余额查询\n")
                     .text("用户: " + user.getQq() + "\n")
-                    .text("当前余额: " + user.getCaBalance() + " CA\n");
+                    .text("当前余额: " + String.format("%.9f", user.getCaBalance()) + " CA\n");
             
             // 如果有交易记录，则显示最近的几笔交易
             if (!recentTransactions.isEmpty()) {
@@ -92,7 +92,9 @@ public class BalanceCommandPlugin {
                 
                 for (int i = 0; i < recentTransactions.size(); i++) {
                     CaTransaction transaction = recentTransactions.get(i);
-                    String amountText = transaction.getAmount() > 0 ? "+" + transaction.getAmount() : String.valueOf(transaction.getAmount());
+                    String amountText = transaction.getAmount() > 0 ? 
+                            "+" + String.format("%.9f", transaction.getAmount()) : 
+                            String.format("%.9f", transaction.getAmount());
                     
                     msgBuilder.text((i + 1) + ". " + transaction.getType() + " " + amountText + " CA")
                              .text(" (" + transaction.getCreateTime().format(FORMATTER) + ")")

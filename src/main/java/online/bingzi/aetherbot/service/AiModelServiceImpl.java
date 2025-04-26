@@ -40,7 +40,7 @@ public class AiModelServiceImpl implements AiModelService {
         }
         
         return models.stream()
-                .map(model -> model.getName() + " (消耗: " + model.getCostPerRequest() + " CA)")
+                .map(model -> model.getName() + " (消耗: " + String.format("%.9f", model.getCostPerRequest()) + " CA)")
                 .collect(Collectors.joining("\n"));
     }
     

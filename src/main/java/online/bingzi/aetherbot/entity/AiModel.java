@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import online.bingzi.aetherbot.enums.ModelStatus;
 import org.hibernate.annotations.Comment;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -88,6 +90,18 @@ public class AiModel {
     public Double getCostPerRequest() {
         // 这里假设一个简单的计算方式：默认一次请求大约使用2000个token
         int estimatedTokensPerRequest = 2000;
-        return (costPerThousandTokens * estimatedTokensPerRequest / 1000) * multiplier;
+        
+        // 使用BigDecimal进行精确计算，确保精度不会丢失
+        BigDecimal tokenCost = new BigDecimal(costPerThousandTokens.toString());
+        BigDecimal estimatedTokens = new BigDecimal(estimatedTokensPerRequest);
+        BigDecimal divisor = new BigDecimal("1000");
+        BigDecimal multiplierValue = new BigDecimal(multiplier.toString());
+        
+        // 计算: (costPerThousandTokens * estimatedTokensPerRequest / 1000) * multiplier
+        BigDecimal result = tokenCost.multiply(estimatedTokens)
+                              .divide(divisor, 9, RoundingMode.HALF_UP)
+                              .multiply(multiplierValue);
+        
+        return result.doubleValue();
     }
 } 
