@@ -44,7 +44,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     @Transactional
     public Conversation endConversation(Conversation conversation) {
-        conversation.setStatus(ConversationStatus.ENDED);
+        conversation.setStatus(ConversationStatus.CLOSED);
         conversation.setUpdateTime(LocalDateTime.now());
         
         Conversation savedConversation = conversationRepository.save(conversation);
