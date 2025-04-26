@@ -61,7 +61,8 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     @Transactional(readOnly = true)
     public Conversation getActiveConversation(User user) {
-        List<Conversation> activeConversations = conversationRepository.findByUserAndStatus(
+        // 使用优化的查询方法，预先加载AiModel，避免懒加载异常
+        List<Conversation> activeConversations = conversationRepository.findByUserAndStatusWithAiModel(
                 user, ConversationStatus.ACTIVE);
         
         if (activeConversations.isEmpty()) {
