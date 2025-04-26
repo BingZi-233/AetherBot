@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: Aether
+    version: 0.0.1-beta
+  profiles:
+    active: dev
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  servlet:
+    context-path: /api 

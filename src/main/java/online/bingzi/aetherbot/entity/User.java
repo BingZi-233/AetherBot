@@ -1,0 +1,74 @@
+package online.bingzi.aetherbot.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import online.bingzi.aetherbot.enums.UserStatus;
+import org.hibernate.annotations.Comment;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+/**
+ * 用户实体
+ * 存储用户的基本信息、CA余额和状态
+ */
+@Entity
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    
+    /**
+     * 用户ID（主键）
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Comment("用户ID（主键）")
+    private UUID id;
+    
+    /**
+     * QQ号码，用于识别用户
+     */
+    @Column(unique = true, nullable = false)
+    @Comment("QQ号码，用于识别用户")
+    private String qq;
+    
+    /**
+     * 用户名
+     */
+    @Column(length = 50)
+    @Comment("用户名")
+    private String username;
+    
+    /**
+     * CA余额
+     */
+    @Column(nullable = false)
+    @Comment("CA余额")
+    private Double caBalance = 0.0;
+    
+    /**
+     * 用户状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Comment("用户状态：NORMAL-正常，BANNED-禁用")
+    private UserStatus status = UserStatus.NORMAL;
+    
+    /**
+     * 创建时间
+     */
+    @Column(nullable = false)
+    @Comment("创建时间")
+    private LocalDateTime createTime = LocalDateTime.now();
+    
+    /**
+     * 更新时间
+     */
+    @Column(nullable = false)
+    @Comment("更新时间")
+    private LocalDateTime updateTime = LocalDateTime.now();
+} 
