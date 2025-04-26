@@ -9,6 +9,12 @@ spring:
     time-zone: Asia/Shanghai
     serialization:
       write-dates-as-timestamps: false
+  # OpenAI配置
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:your_api_key_here}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      model: gpt-3.5-turbo
 
 server:
   servlet:
