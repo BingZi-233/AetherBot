@@ -17,6 +17,7 @@ import online.bingzi.aetherbot.service.AiModelService;
 import online.bingzi.aetherbot.service.UserService;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.regex.Matcher;
 
 /**
@@ -93,8 +94,8 @@ public class ModelManageCommandPlugin {
 
             // 解析参数
             String modelName = matcher.group(1);
-            double promptCostPerThousandTokens = Double.parseDouble(matcher.group(2));
-            double completionCostPerThousandTokens = Double.parseDouble(matcher.group(4));
+            BigDecimal promptCostPerThousandTokens = new BigDecimal(matcher.group(2));
+            BigDecimal completionCostPerThousandTokens = new BigDecimal(matcher.group(4));
             String description = matcher.groupCount() >= 6 && matcher.group(6) != null
                     ? matcher.group(6).trim() : "";
 
@@ -110,9 +111,9 @@ public class ModelManageCommandPlugin {
                     .text("模型添加成功！\n")
                     .text("==================\n")
                     .text("名称: " + newModel.getName() + "\n")
-                    .text("提问费用: " + newModel.getPromptCostPerThousandTokens() + " CA/千Token\n")
-                    .text("回答费用: " + newModel.getCompletionCostPerThousandTokens() + " CA/千Token\n")
-                    .text("合计费用: " + String.format("%.9f", newModel.getCostPerRequest()) + " CA/次\n")
+                    .text("提问费用: " + newModel.getPromptCostPerThousandTokens().toPlainString() + " CA/千Token\n")
+                    .text("回答费用: " + newModel.getCompletionCostPerThousandTokens().toPlainString() + " CA/千Token\n")
+                    .text("合计费用: " + newModel.getCostPerRequest().toPlainString() + " CA/次\n")
                     .text("描述: " + (newModel.getDescription() != null ? newModel.getDescription() : "无"))
                     .build();
 

@@ -18,6 +18,7 @@ import online.bingzi.aetherbot.service.UserService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 
@@ -89,7 +90,7 @@ public class RechargeCommandPlugin {
 
             // 解析参数，判断是给别人充值还是给自己充值
             String targetQQ;
-            double amount;
+            BigDecimal amount;
             String[] parts = params.trim().split("\\s+");
 
             if (parts.length == 1) {
@@ -111,7 +112,7 @@ public class RechargeCommandPlugin {
             }
 
             // 验证金额有效性
-            if (amount <= 0) {
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                 String errorMsg = MsgUtils.builder()
                         .text("充值金额必须大于0！")
                         .build();
@@ -123,14 +124,16 @@ public class RechargeCommandPlugin {
             // 查找目标用户
             User targetUser = userService.findByQQ(targetQQ);
 
+            // 记录旧余额用于显示
+            BigDecimal oldBalance = new BigDecimal(String.valueOf(targetUser.getCaBalance()));
+            
             // 进行充值
-            double oldBalance = targetUser.getCaBalance();
             targetUser = userService.updateCaBalance(targetUser, amount);
 
             // 记录交易
             CaTransaction transaction = new CaTransaction();
             transaction.setUser(targetUser);
-            transaction.setAmount(amount);
+            transaction.setAmount(amount.doubleValue());
             transaction.setType(TransactionType.RECHARGE);
 
             if (!operatorQQ.equals(targetQQ)) {
@@ -146,9 +149,9 @@ public class RechargeCommandPlugin {
             String successMsg = MsgUtils.builder()
                     .text("充值成功！\n")
                     .text("用户: " + targetQQ + "\n")
-                    .text("充值金额: " + String.format("%.9f", amount) + " CA\n")
-                    .text("充值前余额: " + String.format("%.9f", oldBalance) + " CA\n")
-                    .text("当前余额: " + String.format("%.9f", targetUser.getCaBalance()) + " CA")
+                    .text("充值金额: " + amount.toPlainString() + " CA\n")
+                    .text("充值前余额: " + oldBalance.toPlainString() + " CA\n")
+                    .text("当前余额: " + new BigDecimal(String.valueOf(targetUser.getCaBalance())).toPlainString() + " CA")
                     .build();
 
             sendResponse(bot, senderId, groupId, successMsg);
@@ -157,15 +160,15 @@ public class RechargeCommandPlugin {
             if (!operatorQQ.equals(targetQQ)) {
                 String notifyMsg = MsgUtils.builder()
                         .text("您收到一笔CA代币充值！\n")
-                        .text("充值金额: " + String.format("%.9f", amount) + " CA\n")
-                        .text("当前余额: " + String.format("%.9f", targetUser.getCaBalance()) + " CA\n")
+                        .text("充值金额: " + amount.toPlainString() + " CA\n")
+                        .text("当前余额: " + new BigDecimal(String.valueOf(targetUser.getCaBalance())).toPlainString() + " CA\n")
                         .text("充值时间: " + transaction.getCreateTime())
                         .build();
 
                 bot.sendPrivateMsg(Long.parseLong(targetQQ), notifyMsg, false);
             }
 
-            log.info("充值完成 - 操作者: {}, 目标用户: {}, 金额: {} CA", operatorQQ, targetQQ, amount);
+            log.info("充值完成 - 操作者: {}, 目标用户: {}, 金额: {} CA", operatorQQ, targetQQ, amount.toPlainString());
 
         } catch (NumberFormatException e) {
             String errorMsg = MsgUtils.builder()
@@ -190,8 +193,8 @@ public class RechargeCommandPlugin {
      * @return 解析后的金额
      * @throws NumberFormatException 如果解析失败
      */
-    private double parseAmount(String amountStr) throws NumberFormatException {
-        return Double.parseDouble(amountStr);
+    private BigDecimal parseAmount(String amountStr) throws NumberFormatException {
+        return new BigDecimal(amountStr);
     }
 
     /**
