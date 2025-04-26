@@ -32,7 +32,7 @@ public class Conversation {
     /**
      * 会话所属用户
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     @Comment("会话所属用户ID")
     private User user;
@@ -40,7 +40,7 @@ public class Conversation {
     /**
      * 使用的AI模型
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ai_model_id", nullable = false)
     @Comment("使用的AI模型ID")
     private AiModel aiModel;
