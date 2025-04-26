@@ -6,6 +6,7 @@ import online.bingzi.aetherbot.entity.AiModel;
 import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.enums.MessageType;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -48,11 +49,8 @@ public class AiChatServiceImpl implements AiChatService {
                     if (msg.getType() == MessageType.USER) {
                         promptBuilder = promptBuilder.user(msg.getContent());
                     } else {
-                        // 对于AI回复消息，直接添加为已有消息
-                        promptBuilder = promptBuilder.message(org.springframework.ai.chat.messages.Message.of(
-                            org.springframework.ai.chat.messages.MessageType.ASSISTANT,
-                            msg.getContent()
-                        ));
+                        // 对于AI回复消息，使用正确的API添加为Assistant消息
+                        promptBuilder = promptBuilder.messages(new AssistantMessage(msg.getContent()));
                     }
                 }
             }
