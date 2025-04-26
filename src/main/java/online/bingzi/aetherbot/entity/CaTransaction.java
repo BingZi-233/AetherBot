@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CaTransaction {
-    
+
     /**
      * 交易ID（主键）
      */
@@ -28,7 +28,7 @@ public class CaTransaction {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Comment("交易ID（主键）")
     private UUID id;
-    
+
     /**
      * 关联用户
      */
@@ -36,14 +36,14 @@ public class CaTransaction {
     @JoinColumn(name = "user_id", nullable = false)
     @Comment("关联用户ID")
     private User user;
-    
+
     /**
      * 交易金额
      */
     @Column(nullable = false)
     @Comment("交易金额")
     private Double amount;
-    
+
     /**
      * 交易类型
      */
@@ -51,14 +51,14 @@ public class CaTransaction {
     @Column(nullable = false)
     @Comment("交易类型：RECHARGE-充值，CONSUME-消费")
     private TransactionType type;
-    
+
     /**
      * 交易描述
      */
     @Column(length = 255)
     @Comment("交易描述")
     private String description;
-    
+
     /**
      * 关联会话
      */
@@ -66,7 +66,7 @@ public class CaTransaction {
     @JoinColumn(name = "conversation_id")
     @Comment("关联会话ID（可选）")
     private Conversation relatedConversation;
-    
+
     /**
      * 创建时间
      */

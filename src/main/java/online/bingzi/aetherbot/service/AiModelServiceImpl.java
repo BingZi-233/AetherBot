@@ -34,16 +34,16 @@ public class AiModelServiceImpl implements AiModelService {
     @Override
     public String getAvailableModelsAsString() {
         List<AiModel> models = getAvailableModels();
-        
+
         if (models.isEmpty()) {
             return "暂无可用模型";
         }
-        
+
         return models.stream()
                 .map(model -> model.getName() + " (消耗: " + String.format("%.9f", model.getCostPerRequest()) + " CA)")
                 .collect(Collectors.joining("\n"));
     }
-    
+
     @Override
     @Transactional
     public AiModel createModel(String name, Double costPerThousandTokens, String description) {
@@ -51,7 +51,7 @@ public class AiModelServiceImpl implements AiModelService {
         if (aiModelRepository.findByName(name).isPresent()) {
             throw new IllegalArgumentException("模型名称 '" + name + "' 已存在");
         }
-        
+
         // 创建新的模型实体
         AiModel model = new AiModel();
         model.setName(name);
@@ -61,7 +61,7 @@ public class AiModelServiceImpl implements AiModelService {
         model.setMultiplier(1.0); // 默认倍率为1.0
         model.setCreateTime(LocalDateTime.now());
         model.setUpdateTime(LocalDateTime.now());
-        
+
         // 保存到数据库
         return aiModelRepository.save(model);
     }
@@ -71,15 +71,15 @@ public class AiModelServiceImpl implements AiModelService {
     public AiModel updateModelStatus(String name, ModelStatus status) {
         // 查找模型
         AiModel model = aiModelRepository.findByName(name).orElse(null);
-        
+
         if (model == null) {
             return null;
         }
-        
+
         // 更新状态和更新时间
         model.setStatus(status);
         model.setUpdateTime(LocalDateTime.now());
-        
+
         // 保存更新
         return aiModelRepository.save(model);
     }

@@ -10,7 +10,7 @@ public enum ConversationStatus {
      * 会话仍在进行中，可以继续对话
      */
     ACTIVE,    // 活跃
-    
+
     /**
      * 关闭状态
      * 会话已结束，不能继续对话

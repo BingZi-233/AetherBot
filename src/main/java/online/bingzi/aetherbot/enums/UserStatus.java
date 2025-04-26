@@ -10,7 +10,7 @@ public enum UserStatus {
      * 用户可以正常使用系统功能
      */
     NORMAL,  // 正常
-    
+
     /**
      * 禁用状态
      * 用户被禁止使用系统功能

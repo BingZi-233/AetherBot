@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.regex.Matcher;
 
 /**
  * CA代币余额查询指令插件
@@ -30,10 +29,10 @@ import java.util.regex.Matcher;
 @RequiredArgsConstructor
 public class BalanceCommandPlugin {
 
-    private final UserService userService;
-    private final CaTransactionRepository caTransactionRepository;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final int RECENT_TRANSACTIONS_COUNT = 3;
+    private final UserService userService;
+    private final CaTransactionRepository caTransactionRepository;
 
     /**
      * 处理私聊余额查询指令
@@ -43,7 +42,7 @@ public class BalanceCommandPlugin {
     @MessageHandlerFilter(cmd = "^@balance$")
     public void handlePrivateBalance(Bot bot, PrivateMessageEvent event) {
         String qq = String.valueOf(event.getUserId());
-        
+
         // 处理余额查询请求
         processBalanceRequest(bot, qq, event.getUserId(), null);
     }
@@ -56,50 +55,50 @@ public class BalanceCommandPlugin {
     @MessageHandlerFilter(cmd = "^@balance$")
     public void handleGroupBalance(Bot bot, GroupMessageEvent event) {
         String qq = String.valueOf(event.getUserId());
-        
+
         // 处理余额查询请求
         processBalanceRequest(bot, qq, event.getUserId(), event.getGroupId());
     }
 
     /**
      * 处理余额查询请求
-     * 
-     * @param bot 机器人实例
-     * @param qq 查询者QQ
+     *
+     * @param bot      机器人实例
+     * @param qq       查询者QQ
      * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
+     * @param groupId  群ID，如果是私聊则为null
      */
     private void processBalanceRequest(Bot bot, String qq, long senderId, Long groupId) {
         try {
             // 查找用户信息
             User user = userService.findByQQ(qq);
-            
+
             // 查询最近的交易记录
             List<CaTransaction> recentTransactions = caTransactionRepository.findByUserOrderByCreateTimeDesc(user);
             if (recentTransactions.size() > RECENT_TRANSACTIONS_COUNT) {
                 recentTransactions = recentTransactions.subList(0, RECENT_TRANSACTIONS_COUNT);
             }
-            
+
             // 构建余额信息
             MsgUtils msgBuilder = MsgUtils.builder()
                     .text("CA代币余额查询\n")
                     .text("用户: " + user.getQq() + "\n")
                     .text("当前余额: " + String.format("%.9f", user.getCaBalance()) + " CA\n");
-            
+
             // 如果有交易记录，则显示最近的几笔交易
             if (!recentTransactions.isEmpty()) {
                 msgBuilder.text("\n最近" + recentTransactions.size() + "笔交易:\n");
-                
+
                 for (int i = 0; i < recentTransactions.size(); i++) {
                     CaTransaction transaction = recentTransactions.get(i);
-                    String amountText = transaction.getAmount() > 0 ? 
-                            "+" + String.format("%.9f", transaction.getAmount()) : 
+                    String amountText = transaction.getAmount() > 0 ?
+                            "+" + String.format("%.9f", transaction.getAmount()) :
                             String.format("%.9f", transaction.getAmount());
-                    
+
                     msgBuilder.text((i + 1) + ". " + transaction.getType() + " " + amountText + " CA")
-                             .text(" (" + transaction.getCreateTime().format(FORMATTER) + ")")
-                             .text("\n   " + transaction.getDescription());
-                    
+                            .text(" (" + transaction.getCreateTime().format(FORMATTER) + ")")
+                            .text("\n   " + transaction.getDescription());
+
                     // 如果不是最后一条记录，则添加换行
                     if (i < recentTransactions.size() - 1) {
                         msgBuilder.text("\n");
@@ -108,27 +107,27 @@ public class BalanceCommandPlugin {
             } else {
                 msgBuilder.text("\n暂无交易记录");
             }
-            
+
             String balanceInfo = msgBuilder.build();
             sendResponse(bot, senderId, groupId, balanceInfo);
-            
+
         } catch (Exception e) {
             log.error("处理余额查询请求时出错", e);
             String errorMsg = MsgUtils.builder()
                     .text("处理余额查询请求时发生错误: " + e.getMessage())
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, errorMsg);
         }
     }
-    
+
     /**
      * 发送回复消息
-     * 
-     * @param bot 机器人实例
+     *
+     * @param bot      机器人实例
      * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
-     * @param message 消息内容
+     * @param groupId  群ID，如果是私聊则为null
+     * @param message  消息内容
      */
     private void sendResponse(Bot bot, long senderId, Long groupId, String message) {
         if (groupId != null) {

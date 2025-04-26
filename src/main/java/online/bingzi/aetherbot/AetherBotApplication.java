@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class AetherBotApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(AetherBotApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(AetherBotApplication.class, args);
+    }
 
 }

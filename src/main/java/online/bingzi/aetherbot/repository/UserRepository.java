@@ -11,18 +11,18 @@ import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    
+
     /**
      * 根据QQ号查找用户
-     * 
+     *
      * @param qq QQ号
      * @return 可能存在的用户
      */
     Optional<User> findByQq(String qq);
-    
+
     /**
      * 根据状态查找用户列表
-     * 
+     *
      * @param status 用户状态
      * @return 用户列表
      */

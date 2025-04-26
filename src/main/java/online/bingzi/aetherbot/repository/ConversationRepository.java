@@ -13,29 +13,29 @@ import java.util.UUID;
 
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, UUID> {
-    
+
     /**
      * 查找用户的所有对话
-     * 
+     *
      * @param user 用户
      * @return 对话列表
      */
     List<Conversation> findByUser(User user);
-    
+
     /**
      * 查找用户的指定状态的对话
-     * 
-     * @param user 用户
+     *
+     * @param user   用户
      * @param status 对话状态
      * @return 对话列表
      */
     List<Conversation> findByUserAndStatus(User user, ConversationStatus status);
-    
+
     /**
      * 查找用户的指定状态的对话，并预先加载AI模型
      * 使用JOIN FETCH解决懒加载问题
-     * 
-     * @param user 用户
+     *
+     * @param user   用户
      * @param status 对话状态
      * @return 对话列表，已预加载AI模型
      */

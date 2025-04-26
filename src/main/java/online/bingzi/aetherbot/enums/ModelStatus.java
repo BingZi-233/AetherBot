@@ -10,7 +10,7 @@ public enum ModelStatus {
      * 模型可以被用户选择使用
      */
     ACTIVE,    // 活跃
-    
+
     /**
      * 禁用状态
      * 模型暂时不可被用户选择使用

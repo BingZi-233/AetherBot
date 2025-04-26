@@ -11,18 +11,18 @@ import java.util.UUID;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, UUID> {
-    
+
     /**
      * 根据对话查询消息列表
-     * 
+     *
      * @param conversation 对话
      * @return 消息列表
      */
     List<Message> findByConversationOrderByCreateTimeAsc(Conversation conversation);
-    
+
     /**
      * 根据用户查询消息列表
-     * 
+     *
      * @param user 用户
      * @return 消息列表
      */

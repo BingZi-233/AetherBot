@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Message {
-    
+
     /**
      * 消息ID（主键）
      */
@@ -28,7 +28,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Comment("消息ID（主键）")
     private UUID id;
-    
+
     /**
      * 所属用户
      */
@@ -36,7 +36,7 @@ public class Message {
     @JoinColumn(name = "user_id", nullable = false)
     @Comment("所属用户ID")
     private User user;
-    
+
     /**
      * 所属会话
      */
@@ -44,14 +44,14 @@ public class Message {
     @JoinColumn(name = "conversation_id", nullable = false)
     @Comment("所属会话ID")
     private Conversation conversation;
-    
+
     /**
      * 消息内容
      */
     @Column(columnDefinition = "TEXT", nullable = false)
     @Comment("消息内容")
     private String content;
-    
+
     /**
      * 消息类型
      */
@@ -59,21 +59,21 @@ public class Message {
     @Column(nullable = false)
     @Comment("消息类型：USER-用户消息，AI-AI回复")
     private MessageType type;
-    
+
     /**
      * Token计数
      */
     @Column
     @Comment("Token计数")
     private Integer tokenCount;
-    
+
     /**
      * CA消费
      */
     @Column
     @Comment("消耗的CA币")
     private Double caCost;
-    
+
     /**
      * 创建时间
      */

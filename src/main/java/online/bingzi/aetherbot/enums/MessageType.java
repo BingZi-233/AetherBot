@@ -10,7 +10,7 @@ public enum MessageType {
      * 由用户发送的消息
      */
     USER,
-    
+
     /**
      * AI回复
      * 由AI模型生成的回复消息

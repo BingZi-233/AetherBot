@@ -53,7 +53,7 @@ public class ModelManageCommandPlugin {
         String qq = String.valueOf(event.getUserId());
         processAddModelRequest(bot, qq, matcher, event.getUserId(), event.getGroupId());
     }
-    
+
     /**
      * 处理私聊模型状态更新指令
      * 格式: @modelstatus [模型名称] [ACTIVE|DISABLED]
@@ -64,7 +64,7 @@ public class ModelManageCommandPlugin {
         String qq = String.valueOf(event.getUserId());
         processModelStatusRequest(bot, qq, matcher, event.getUserId(), null);
     }
-    
+
     /**
      * 处理群聊模型状态更新指令
      * 格式: @modelstatus [模型名称] [ACTIVE|DISABLED]
@@ -90,16 +90,16 @@ public class ModelManageCommandPlugin {
                 sendResponse(bot, senderId, groupId, errorMsg);
                 return;
             }
-            
+
             // 解析参数
             String modelName = matcher.group(1);
             double costPerThousandTokens = Double.parseDouble(matcher.group(2));
-            String description = matcher.groupCount() >= 4 && matcher.group(4) != null 
+            String description = matcher.groupCount() >= 4 && matcher.group(4) != null
                     ? matcher.group(4).trim() : "";
-            
+
             // 创建新模型
             AiModel newModel = aiModelService.createModel(modelName, costPerThousandTokens, description);
-            
+
             // 构建成功消息
             String successMsg = MsgUtils.builder()
                     .text("模型添加成功！\n")
@@ -108,16 +108,16 @@ public class ModelManageCommandPlugin {
                     .text("费用: " + newModel.getCostPerRequest() + " CA/次\n")
                     .text("描述: " + (newModel.getDescription() != null ? newModel.getDescription() : "无"))
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, successMsg);
-            
+
         } catch (IllegalArgumentException e) {
             // 处理参数错误
             String errorMsg = MsgUtils.builder()
                     .text("添加模型失败: " + e.getMessage())
                     .build();
             sendResponse(bot, senderId, groupId, errorMsg);
-            
+
         } catch (Exception e) {
             // 处理其他错误
             log.error("处理添加模型请求时出错", e);
@@ -127,7 +127,7 @@ public class ModelManageCommandPlugin {
             sendResponse(bot, senderId, groupId, errorMsg);
         }
     }
-    
+
     /**
      * 处理模型状态更新请求
      */
@@ -142,15 +142,15 @@ public class ModelManageCommandPlugin {
                 sendResponse(bot, senderId, groupId, errorMsg);
                 return;
             }
-            
+
             // 解析参数
             String modelName = matcher.group(1);
             String statusStr = matcher.group(2);
             ModelStatus status = ModelStatus.valueOf(statusStr);
-            
+
             // 更新模型状态
             AiModel updatedModel = aiModelService.updateModelStatus(modelName, status);
-            
+
             if (updatedModel == null) {
                 String errorMsg = MsgUtils.builder()
                         .text("模型 '" + modelName + "' 不存在。")
@@ -158,7 +158,7 @@ public class ModelManageCommandPlugin {
                 sendResponse(bot, senderId, groupId, errorMsg);
                 return;
             }
-            
+
             // 构建成功消息
             String statusText = status == ModelStatus.ACTIVE ? "启用" : "禁用";
             String successMsg = MsgUtils.builder()
@@ -167,16 +167,16 @@ public class ModelManageCommandPlugin {
                     .text("名称: " + updatedModel.getName() + "\n")
                     .text("状态: " + statusText)
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, successMsg);
-            
+
         } catch (IllegalArgumentException e) {
             // 处理参数错误
             String errorMsg = MsgUtils.builder()
                     .text("更新模型状态失败: " + e.getMessage())
                     .build();
             sendResponse(bot, senderId, groupId, errorMsg);
-            
+
         } catch (Exception e) {
             // 处理其他错误
             log.error("处理更新模型状态请求时出错", e);

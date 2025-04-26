@@ -43,7 +43,7 @@ public class SetModelCommandPlugin {
     public void handlePrivateSetModel(Bot bot, PrivateMessageEvent event, Matcher matcher) {
         String qq = String.valueOf(event.getUserId());
         String modelName = matcher.group(1);
-        
+
         // 处理设置模型请求
         processSetModelRequest(bot, qq, modelName, event.getUserId(), null);
     }
@@ -57,26 +57,26 @@ public class SetModelCommandPlugin {
     public void handleGroupSetModel(Bot bot, GroupMessageEvent event, Matcher matcher) {
         String qq = String.valueOf(event.getUserId());
         String modelName = matcher.group(1);
-        
+
         // 处理设置模型请求
         processSetModelRequest(bot, qq, modelName, event.getUserId(), event.getGroupId());
     }
 
     /**
      * 处理设置模型请求
-     * 
-     * @param bot 机器人实例
-     * @param qq 用户QQ
+     *
+     * @param bot       机器人实例
+     * @param qq        用户QQ
      * @param modelName 模型名称
-     * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
+     * @param senderId  发送者ID
+     * @param groupId   群ID，如果是私聊则为null
      */
-    private void processSetModelRequest(Bot bot, String qq, String modelName, 
-                                       long senderId, Long groupId) {
+    private void processSetModelRequest(Bot bot, String qq, String modelName,
+                                        long senderId, Long groupId) {
         try {
             // 查找用户，如果不存在则创建
             User user = userService.findByQQ(qq);
-            
+
             // 查找AI模型
             AiModel model = aiModelService.findByName(modelName);
             if (model == null) {
@@ -85,46 +85,46 @@ public class SetModelCommandPlugin {
                         .text("\n可用模型: ")
                         .text(aiModelService.getAvailableModelsAsString())
                         .build();
-                
+
                 sendResponse(bot, senderId, groupId, errorMsg);
                 return;
             }
-            
+
             // 结束用户当前的活跃对话(如果有)
             Conversation activeConversation = conversationService.getActiveConversation(user);
             if (activeConversation != null) {
                 conversationService.endConversation(activeConversation);
             }
-            
+
             // 创建新的对话
             Conversation newConversation = conversationService.createConversation(user, model);
-            
+
             // 发送成功消息
             String successMsg = MsgUtils.builder()
                     .text("已成功设置对话模型为: " + model.getName())
                     .text("\n费用: " + String.format("%.9f", model.getCostPerRequest()) + " CA/次")
                     .text("\n现在可以直接使用 @chat [问题内容] 进行对话")
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, successMsg);
-            
+
         } catch (Exception e) {
             log.error("处理设置模型请求时出错", e);
             String errorMsg = MsgUtils.builder()
                     .text("处理设置模型请求时发生错误: " + e.getMessage())
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, errorMsg);
         }
     }
-    
+
     /**
      * 发送回复消息
-     * 
-     * @param bot 机器人实例
+     *
+     * @param bot      机器人实例
      * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
-     * @param message 消息内容
+     * @param groupId  群ID，如果是私聊则为null
+     * @param message  消息内容
      */
     private void sendResponse(Bot bot, long senderId, Long groupId, String message) {
         if (groupId != null) {

@@ -37,7 +37,7 @@ public class EndConversationCommandPlugin {
     @MessageHandlerFilter(cmd = "^@end$")
     public void handlePrivateEnd(Bot bot, PrivateMessageEvent event) {
         String qq = String.valueOf(event.getUserId());
-        
+
         // 处理结束对话请求
         processEndRequest(bot, qq, event.getUserId(), null);
     }
@@ -50,64 +50,64 @@ public class EndConversationCommandPlugin {
     @MessageHandlerFilter(cmd = "^@end$")
     public void handleGroupEnd(Bot bot, GroupMessageEvent event) {
         String qq = String.valueOf(event.getUserId());
-        
+
         // 处理结束对话请求
         processEndRequest(bot, qq, event.getUserId(), event.getGroupId());
     }
 
     /**
      * 处理结束对话请求
-     * 
-     * @param bot 机器人实例
-     * @param qq 用户QQ
+     *
+     * @param bot      机器人实例
+     * @param qq       用户QQ
      * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
+     * @param groupId  群ID，如果是私聊则为null
      */
     private void processEndRequest(Bot bot, String qq, long senderId, Long groupId) {
         try {
             // 查找用户信息
             User user = userService.findByQQ(qq);
-            
+
             // 获取用户的活跃对话
             Conversation activeConversation = conversationService.getActiveConversation(user);
-            
+
             if (activeConversation == null) {
                 String msg = MsgUtils.builder()
                         .text("您当前没有活跃的对话。")
                         .build();
-                
+
                 sendResponse(bot, senderId, groupId, msg);
                 return;
             }
-            
+
             // 结束对话
             conversationService.endConversation(activeConversation);
-            
+
             String msg = MsgUtils.builder()
                     .text("已结束当前对话。\n")
                     .text("对话模型: " + activeConversation.getAiModel().getName() + "\n")
                     .text("开始时间: " + activeConversation.getCreateTime())
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, msg);
-            
+
         } catch (Exception e) {
             log.error("处理结束对话请求时出错", e);
             String errorMsg = MsgUtils.builder()
                     .text("处理结束对话请求时发生错误: " + e.getMessage())
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, errorMsg);
         }
     }
-    
+
     /**
      * 发送回复消息
-     * 
-     * @param bot 机器人实例
+     *
+     * @param bot      机器人实例
      * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
-     * @param message 消息内容
+     * @param groupId  群ID，如果是私聊则为null
+     * @param message  消息内容
      */
     private void sendResponse(Bot bot, long senderId, Long groupId, String message) {
         if (groupId != null) {

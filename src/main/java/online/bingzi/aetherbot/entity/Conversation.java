@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Conversation {
-    
+
     /**
      * 会话ID（主键）
      */
@@ -28,7 +28,7 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Comment("会话ID（主键）")
     private UUID id;
-    
+
     /**
      * 会话所属用户
      */
@@ -36,7 +36,7 @@ public class Conversation {
     @JoinColumn(name = "user_id", nullable = false)
     @Comment("会话所属用户ID")
     private User user;
-    
+
     /**
      * 使用的AI模型
      */
@@ -44,7 +44,7 @@ public class Conversation {
     @JoinColumn(name = "ai_model_id", nullable = false)
     @Comment("使用的AI模型ID")
     private AiModel aiModel;
-    
+
     /**
      * 会话状态
      */
@@ -52,14 +52,14 @@ public class Conversation {
     @Column(nullable = false)
     @Comment("会话状态：ACTIVE-活跃，CLOSED-关闭")
     private ConversationStatus status = ConversationStatus.ACTIVE;
-    
+
     /**
      * 创建时间
      */
     @Column(nullable = false)
     @Comment("创建时间")
     private LocalDateTime createTime = LocalDateTime.now();
-    
+
     /**
      * 更新时间
      */

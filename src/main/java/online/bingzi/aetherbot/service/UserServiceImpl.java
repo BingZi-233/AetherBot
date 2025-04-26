@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdateTime(LocalDateTime.now());
         return userRepository.save(user);
     }
-    
+
     @Override
     public boolean isAdmin(User user) {
         if (user == null) {
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         // 否则检查QQ是否在管理员列表中
         return adminProperties.isAdmin(user.getQq());
     }
-    
+
     @Override
     @Transactional
     public User setUserRole(User user, UserRole role) {
@@ -69,14 +69,14 @@ public class UserServiceImpl implements UserService {
         newUser.setQq(qq);
         newUser.setCaBalance(0.0);
         newUser.setStatus(UserStatus.NORMAL);
-        
+
         // 检查QQ是否在管理员列表中，设置对应角色
         UserRole role = adminProperties.isAdmin(qq) ? UserRole.ADMIN : UserRole.USER;
         newUser.setRole(role);
-        
+
         newUser.setCreateTime(LocalDateTime.now());
         newUser.setUpdateTime(LocalDateTime.now());
-        
+
         User savedUser = userRepository.save(newUser);
         log.info("已创建新用户: {}, 角色: {}", savedUser, role);
         return savedUser;

@@ -15,12 +15,12 @@ import java.util.List;
 @ConfigurationProperties(prefix = "aether.admin")
 @Data
 public class AdminProperties {
-    
+
     /**
      * 管理员QQ列表
      */
     private List<String> qqList = new ArrayList<>();
-    
+
     /**
      * 检查指定QQ是否为管理员
      *

@@ -52,64 +52,64 @@ public class ModelsCommandPlugin {
 
     /**
      * 处理模型列表查询请求
-     * 
-     * @param bot 机器人实例
+     *
+     * @param bot      机器人实例
      * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
+     * @param groupId  群ID，如果是私聊则为null
      */
     private void processModelsRequest(Bot bot, long senderId, Long groupId) {
         try {
             // 获取所有可用的AI模型
             List<AiModel> models = aiModelService.getAvailableModels();
-            
+
             // 构建模型列表信息
             MsgUtils msgBuilder = MsgUtils.builder()
                     .text("可用AI模型列表\n")
                     .text("====================\n");
-            
+
             if (models.isEmpty()) {
                 msgBuilder.text("暂无可用模型");
             } else {
                 for (int i = 0; i < models.size(); i++) {
                     AiModel model = models.get(i);
-                    
+
                     msgBuilder.text("■ " + model.getName() + "\n")
-                             .text("  费用: " + model.getCostPerRequest() + " CA/次\n");
-                    
+                            .text("  费用: " + model.getCostPerRequest() + " CA/次\n");
+
                     if (model.getDescription() != null && !model.getDescription().isEmpty()) {
                         msgBuilder.text("  描述: " + model.getDescription() + "\n");
                     }
-                    
+
                     // 如果不是最后一个模型，则添加分隔线
                     if (i < models.size() - 1) {
                         msgBuilder.text("--------------------\n");
                     }
                 }
-                
+
                 // 添加使用说明
                 msgBuilder.text("\n使用方法: @chat [模型名称] [问题内容]");
             }
-            
+
             String modelsInfo = msgBuilder.build();
             sendResponse(bot, senderId, groupId, modelsInfo);
-            
+
         } catch (Exception e) {
             log.error("处理模型列表查询请求时出错", e);
             String errorMsg = MsgUtils.builder()
                     .text("处理模型列表查询请求时发生错误: " + e.getMessage())
                     .build();
-            
+
             sendResponse(bot, senderId, groupId, errorMsg);
         }
     }
-    
+
     /**
      * 发送回复消息
-     * 
-     * @param bot 机器人实例
+     *
+     * @param bot      机器人实例
      * @param senderId 发送者ID
-     * @param groupId 群ID，如果是私聊则为null
-     * @param message 消息内容
+     * @param groupId  群ID，如果是私聊则为null
+     * @param message  消息内容
      */
     private void sendResponse(Bot bot, long senderId, Long groupId, String message) {
         if (groupId != null) {

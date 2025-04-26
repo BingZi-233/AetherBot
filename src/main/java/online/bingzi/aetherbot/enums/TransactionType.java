@@ -10,7 +10,7 @@ public enum TransactionType {
      * 用户充值CA币
      */
     RECHARGE,
-    
+
     /**
      * 消费
      * 用户使用CA币进行AI对话消费

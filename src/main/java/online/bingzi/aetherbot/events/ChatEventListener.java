@@ -38,26 +38,26 @@ public class ChatEventListener {
     @Transactional
     public void handleChatCompletedEvent(ChatCompletedEvent event) {
         log.info("处理聊天完成事件: {}", event);
-        
+
         // 获取事件相关信息
         User user = event.getUser();
         double cost = event.getCost();
         String question = event.getQuestion();
         String answer = event.getAnswer();
-        
+
         try {
             // 记录用户问题和AI回答
             saveMessages(user, event);
-            
+
             // 扣除CA代币
             deductCa(user, cost, event);
-            
+
             log.info("聊天事件处理完成，用户：{}，消费：{} CA", user.getQq(), cost);
         } catch (Exception e) {
             log.error("处理聊天完成事件时出错", e);
         }
     }
-    
+
     /**
      * 保存用户问题和AI回答消息
      */
@@ -70,7 +70,7 @@ public class ChatEventListener {
         userMessage.setType(MessageType.USER);
         userMessage.setCreateTime(LocalDateTime.now());
         messageRepository.save(userMessage);
-        
+
         // 保存AI回答
         Message aiMessage = new Message();
         aiMessage.setUser(user);
@@ -80,14 +80,14 @@ public class ChatEventListener {
         aiMessage.setCreateTime(LocalDateTime.now());
         messageRepository.save(aiMessage);
     }
-    
+
     /**
      * 扣除CA代币并记录交易
      */
     private void deductCa(User user, double cost, ChatCompletedEvent event) {
         // 扣除CA代币
         userService.updateCaBalance(user, -cost);
-        
+
         // 记录CA交易
         CaTransaction transaction = new CaTransaction();
         transaction.setUser(user);
