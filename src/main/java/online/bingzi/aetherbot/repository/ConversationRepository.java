@@ -2,6 +2,7 @@ package online.bingzi.aetherbot.repository;
 
 import online.bingzi.aetherbot.entity.Conversation;
 import online.bingzi.aetherbot.entity.User;
+import online.bingzi.aetherbot.enums.ConversationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,4 +19,13 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
      * @return 对话列表
      */
     List<Conversation> findByUser(User user);
+    
+    /**
+     * 查找用户的指定状态的对话
+     * 
+     * @param user 用户
+     * @param status 对话状态
+     * @return 对话列表
+     */
+    List<Conversation> findByUserAndStatus(User user, ConversationStatus status);
 } 

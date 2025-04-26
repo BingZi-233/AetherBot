@@ -1,6 +1,7 @@
 package online.bingzi.aetherbot.service;
 
 import online.bingzi.aetherbot.entity.User;
+import online.bingzi.aetherbot.enums.UserRole;
 
 public interface UserService {
     
@@ -20,4 +21,21 @@ public interface UserService {
      * @return 更新后的用户实体
      */
     User updateCaBalance(User user, double amount);
+    
+    /**
+     * 检查用户是否为管理员
+     *
+     * @param user 用户实体
+     * @return 是否为管理员
+     */
+    boolean isAdmin(User user);
+    
+    /**
+     * 设置用户角色
+     *
+     * @param user 用户实体
+     * @param role 角色
+     * @return 更新后的用户实体
+     */
+    User setUserRole(User user, UserRole role);
 } 

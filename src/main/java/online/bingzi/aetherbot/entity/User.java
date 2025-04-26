@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.bingzi.aetherbot.enums.UserRole;
 import online.bingzi.aetherbot.enums.UserStatus;
 import org.hibernate.annotations.Comment;
 
@@ -57,6 +58,14 @@ public class User {
     @Column(nullable = false)
     @Comment("用户状态：NORMAL-正常，BANNED-禁用")
     private UserStatus status = UserStatus.NORMAL;
+    
+    /**
+     * 用户角色
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Comment("用户角色：ADMIN-管理员，USER-普通用户")
+    private UserRole role = UserRole.USER;
     
     /**
      * 创建时间

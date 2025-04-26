@@ -8,7 +8,6 @@ import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.PrivateMessageEvent;
-import com.mikuac.shiro.common.utils.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -16,11 +15,14 @@ import online.bingzi.aetherbot.service.UserService;
 import online.bingzi.aetherbot.events.ChatCompletedEvent;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.entity.Conversation;
+import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.service.ConversationService;
 import online.bingzi.aetherbot.entity.AiModel;
 import online.bingzi.aetherbot.service.AiModelService;
 
+import java.util.List;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 @Shiro
 @Component
@@ -44,58 +46,86 @@ public class ChatCommandPlugin {
     
     /**
      * 处理私聊聊天指令
-     * 格式: @chat [模型名称] [问题内容]
+     * 格式: @chat [模型名称] [问题内容] 或继续对话: @chat [问题内容]
      */
     @PrivateMessageHandler
-    @MessageHandlerFilter(cmd = "^@chat\\s+([\\w-]+)\\s+(.+)$")
+    @MessageHandlerFilter(cmd = "^@chat\\s+(.+)$")
     public void handlePrivateChat(Bot bot, PrivateMessageEvent event, Matcher matcher) {
         // 获取QQ号
         String qq = String.valueOf(event.getUserId());
-        // 获取模型名称和问题内容
-        String modelName = matcher.group(1);
-        String question = matcher.group(2);
+        // 获取问题内容
+        String input = matcher.group(1);
         
         // 处理聊天请求
-        processChatRequest(bot, qq, modelName, question, event.getUserId(), null);
+        processChatRequest(bot, qq, input, event.getUserId(), null);
     }
     
     /**
      * 处理群聊聊天指令
-     * 格式: @chat [模型名称] [问题内容]
+     * 格式: @chat [模型名称] [问题内容] 或继续对话: @chat [问题内容]
      */
     @GroupMessageHandler
-    @MessageHandlerFilter(cmd = "^@chat\\s+([\\w-]+)\\s+(.+)$")
+    @MessageHandlerFilter(cmd = "^@chat\\s+(.+)$")
     public void handleGroupChat(Bot bot, GroupMessageEvent event, Matcher matcher) {
         // 获取QQ号
         String qq = String.valueOf(event.getUserId());
-        // 获取模型名称和问题内容
-        String modelName = matcher.group(1);
-        String question = matcher.group(2);
+        // 获取问题内容
+        String input = matcher.group(1);
         
         // 处理聊天请求
-        processChatRequest(bot, qq, modelName, question, event.getUserId(), event.getGroupId());
+        processChatRequest(bot, qq, input, event.getUserId(), event.getGroupId());
     }
     
     /**
      * 处理聊天请求
      */
-    private void processChatRequest(Bot bot, String qq, String modelName, String question, 
+    private void processChatRequest(Bot bot, String qq, String input, 
                                     long senderId, Long groupId) {
         try {
             // 查找用户，如果不存在则创建
             User user = userService.findByQQ(qq);
             
-            // 查找AI模型
-            AiModel model = aiModelService.findByName(modelName);
-            if (model == null) {
-                String errorMsg = MsgUtils.builder()
-                        .text("未找到指定的模型: " + modelName)
-                        .text("\n可用模型: ")
-                        .text(aiModelService.getAvailableModelsAsString())
-                        .build();
+            // 检查是否有活跃对话
+            Conversation conversation = conversationService.getActiveConversation(user);
+            
+            // 解析输入内容
+            AiModel model;
+            String question;
+            
+            if (conversation == null) {
+                // 没有活跃对话，需要指定模型名称
+                String[] parts = input.trim().split("\\s+", 2);
+                if (parts.length < 2) {
+                    String errorMsg = MsgUtils.builder()
+                            .text("格式错误，请使用 @chat [模型名称] [问题内容] 开始新对话。")
+                            .build();
+                    
+                    sendResponse(bot, senderId, groupId, errorMsg);
+                    return;
+                }
                 
-                sendResponse(bot, senderId, groupId, errorMsg);
-                return;
+                String modelName = parts[0];
+                question = parts[1];
+                
+                // 查找AI模型
+                model = aiModelService.findByName(modelName);
+                if (model == null) {
+                    String errorMsg = MsgUtils.builder()
+                            .text("未找到指定的模型: " + modelName)
+                            .text("\n可用模型: ")
+                            .text(aiModelService.getAvailableModelsAsString())
+                            .build();
+                    
+                    sendResponse(bot, senderId, groupId, errorMsg);
+                    return;
+                }
+                
+                // 创建新的对话
+                conversation = conversationService.createConversation(user, model);
+            } else {
+                // 已有活跃对话，直接使用输入内容作为问题
+                model = conversation.getAiModel();
+                question = input;
             }
             
             // 检查用户余额
@@ -111,11 +141,23 @@ public class ChatCommandPlugin {
                 return;
             }
             
-            // 创建对话
-            Conversation conversation = conversationService.createConversation(user, model);
+            // 获取对话历史作为上下文
+            List<Message> history = conversationService.getConversationMessages(conversation);
             
-            // TODO: 调用AI服务处理问题，这里简化处理
-            String aiResponse = "这是一个AI回复示例。问题是：" + question;
+            // TODO: 调用AI服务处理问题，传入历史消息作为上下文
+            // 这里简化处理，实际应该调用AI服务API
+            StringBuilder context = new StringBuilder();
+            if (!history.isEmpty()) {
+                // 构建对话历史上下文
+                context.append("历史对话：\n");
+                for (Message msg : history) {
+                    String role = msg.getType().name();
+                    context.append(role).append(": ").append(msg.getContent()).append("\n");
+                }
+                context.append("\n");
+            }
+            
+            String aiResponse = "这是一个AI回复示例。上下文: " + context.toString() + " 问题是：" + question;
             
             // 发送回复
             String responseMsg = MsgUtils.builder()
