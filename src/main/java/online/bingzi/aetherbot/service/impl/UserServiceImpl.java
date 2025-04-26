@@ -1,4 +1,4 @@
-package online.bingzi.aetherbot.service;
+package online.bingzi.aetherbot.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +7,7 @@ import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.enums.UserRole;
 import online.bingzi.aetherbot.enums.UserStatus;
 import online.bingzi.aetherbot.repository.UserRepository;
+import online.bingzi.aetherbot.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

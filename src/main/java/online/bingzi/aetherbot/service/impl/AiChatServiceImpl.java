@@ -1,10 +1,11 @@
-package online.bingzi.aetherbot.service;
+package online.bingzi.aetherbot.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.bingzi.aetherbot.entity.AiModel;
 import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.enums.MessageType;
+import online.bingzi.aetherbot.service.AiChatService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.openai.OpenAiChatOptions;
