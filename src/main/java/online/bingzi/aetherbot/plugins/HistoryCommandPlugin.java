@@ -10,10 +10,12 @@ import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.PrivateMessageEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import online.bingzi.aetherbot.entity.CaTransaction;
 import online.bingzi.aetherbot.entity.Conversation;
 import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.enums.MessageType;
+import online.bingzi.aetherbot.repository.CaTransactionRepository;
 import online.bingzi.aetherbot.repository.ConversationRepository;
 import online.bingzi.aetherbot.repository.MessageRepository;
 import online.bingzi.aetherbot.service.UserService;
@@ -43,6 +45,7 @@ public class HistoryCommandPlugin {
     private final UserService userService;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final CaTransactionRepository caTransactionRepository;
 
     /**
      * 处理私聊历史记录查询指令
@@ -137,46 +140,20 @@ public class HistoryCommandPlugin {
             if (pageConversations.isEmpty()) {
                 msgBuilder.text("暂无对话记录");
             } else {
-                // 收集每个对话的第一条用户消息和AI回复
-                Map<Conversation, List<Message>> conversationMessages = new HashMap<>();
-
-                for (Conversation conversation : pageConversations) {
-                    List<Message> messages = messageRepository.findByConversationOrderByCreateTimeAsc(conversation);
-                    conversationMessages.put(conversation, messages);
-                }
-
                 // 构建每个对话的摘要信息
                 int index = fromIndex + 1;
                 for (Conversation conversation : pageConversations) {
-                    List<Message> messages = conversationMessages.get(conversation);
+                    // 获取对话相关的交易记录并计算总花费
+                    List<CaTransaction> transactions = caTransactionRepository.findByRelatedConversation(conversation);
+                    double totalCost = transactions.stream()
+                            .mapToDouble(CaTransaction::getAmount)
+                            .sum();
+                    // 由于消费是负数，取绝对值显示
+                    double displayCost = Math.abs(totalCost);
 
                     msgBuilder.text(index + ". 模型: " + conversation.getAiModel().getName() + "\n")
-                            .text("   时间: " + conversation.getCreateTime().format(FORMATTER) + "\n");
-
-                    // 如果有消息，则显示第一对问答
-                    if (messages != null && !messages.isEmpty()) {
-                        Message userMessage = messages.stream()
-                                .filter(m -> m.getType() == MessageType.USER)
-                                .findFirst()
-                                .orElse(null);
-
-                        Message aiMessage = messages.stream()
-                                .filter(m -> m.getType() == MessageType.AI)
-                                .findFirst()
-                                .orElse(null);
-
-                        if (userMessage != null) {
-                            String userContent = truncateMessage(userMessage.getContent());
-                            msgBuilder.text("   问: " + userContent + "\n");
-                        }
-
-                        if (aiMessage != null) {
-                            String aiContent = truncateMessage(aiMessage.getContent());
-                            msgBuilder.text("   答: " + aiContent + "\n");
-                        }
-                    } else {
-                        msgBuilder.text("   暂无消息内容\n");
-                    }
+                            .text("   时间: " + conversation.getCreateTime().format(FORMATTER) + "\n")
+                            .text("   花费: " + String.format("%.9f", displayCost) + " CA\n");
 
                     // 如果不是最后一个对话，则添加分隔线
                     if (index < fromIndex + pageConversations.size()) {
