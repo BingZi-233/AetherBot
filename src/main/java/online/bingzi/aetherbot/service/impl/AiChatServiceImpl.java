@@ -8,6 +8,7 @@ import online.bingzi.aetherbot.enums.MessageType;
 import online.bingzi.aetherbot.service.AiChatService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,9 @@ public class AiChatServiceImpl implements AiChatService {
 
     // 注入Spring AI的ChatClient.Builder
     private final ChatClient.Builder chatClientBuilder;
+    
+    // 保存最后一次AI响应
+    private ChatResponse lastResponse;
 
     @Override
     public String chat(AiModel model, String question, List<Message> history) {
@@ -40,7 +44,7 @@ public class AiChatServiceImpl implements AiChatService {
             var promptBuilder = chatClient.prompt();
 
             // 添加历史消息到消息列表
-            List<org.springframework.ai.chat.messages.Message> messages = new ArrayList<>();
+            List<Message> messages = new ArrayList<>();
 
             // 添加历史消息
             if (!history.isEmpty()) {
@@ -68,14 +72,29 @@ public class AiChatServiceImpl implements AiChatService {
 
             // 调用API获取响应
             log.debug("发送请求到OpenAI API, 模型: {}", model.getName());
-            String aiResponse = promptBuilder.call().content();
+            // 保存完整响应
+            this.lastResponse = promptBuilder.call().chatResponse();
+            String aiResponse = this.lastResponse.getResult().getOutput().getText();
 
             log.debug("收到AI回复: {}", aiResponse);
+            
+            // 记录token使用量(如果可用)
+            if (this.lastResponse.getMetadata() != null && this.lastResponse.getMetadata().getUsage() != null) {
+                log.debug("Token使用量 - 提示: {}, 完成: {}, 总计: {}", 
+                        this.lastResponse.getMetadata().getUsage().getPromptTokens(),
+                        this.lastResponse.getMetadata().getUsage().getCompletionTokens(),
+                        this.lastResponse.getMetadata().getUsage().getTotalTokens());
+            }
 
             return aiResponse;
         } catch (Exception e) {
             log.error("生成AI回复时出错", e);
             return "抱歉，处理您的请求时出现了问题，请稍后再试。";
         }
+    }
+    
+    @Override
+    public ChatResponse getLastResponse() {
+        return this.lastResponse;
     }
 } 

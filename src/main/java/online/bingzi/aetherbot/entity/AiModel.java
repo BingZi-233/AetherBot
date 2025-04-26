@@ -120,4 +120,39 @@ public class AiModel {
 
         return totalResult.doubleValue();
     }
+    
+    /**
+     * 基于实际Token消耗计算请求成本
+     *
+     * @param promptTokens 提问Token数量
+     * @param completionTokens 回答Token数量
+     * @return 实际请求成本
+     */
+    public Double calculateActualCost(Integer promptTokens, Integer completionTokens) {
+        if (promptTokens == null || completionTokens == null) {
+            // 如果没有实际Token信息，则返回预估费用
+            return getCostPerRequest();
+        }
+        
+        // 使用BigDecimal进行精确计算
+        BigDecimal promptCost = new BigDecimal(promptCostPerThousandTokens.toString());
+        BigDecimal completionCost = new BigDecimal(completionCostPerThousandTokens.toString());
+        BigDecimal promptTokensValue = new BigDecimal(promptTokens.toString());
+        BigDecimal completionTokensValue = new BigDecimal(completionTokens.toString());
+        BigDecimal divisor = new BigDecimal("1000");
+        BigDecimal multiplierValue = new BigDecimal(multiplier.toString());
+
+        // 计算提问部分费用: (promptCostPerThousandTokens * promptTokens / 1000)
+        BigDecimal promptResult = promptCost.multiply(promptTokensValue)
+                .divide(divisor, 9, RoundingMode.HALF_UP);
+
+        // 计算回答部分费用: (completionCostPerThousandTokens * completionTokens / 1000)
+        BigDecimal completionResult = completionCost.multiply(completionTokensValue)
+                .divide(divisor, 9, RoundingMode.HALF_UP);
+
+        // 合并两部分费用并应用倍率: (promptResult + completionResult) * multiplier
+        BigDecimal totalResult = promptResult.add(completionResult).multiply(multiplierValue);
+
+        return totalResult.doubleValue();
+    }
 } 

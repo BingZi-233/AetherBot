@@ -19,8 +19,10 @@ import online.bingzi.aetherbot.service.AiChatService;
 import online.bingzi.aetherbot.service.AiModelService;
 import online.bingzi.aetherbot.service.ConversationService;
 import online.bingzi.aetherbot.service.UserService;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.ai.chat.metadata.Usage;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -161,8 +163,26 @@ public class ChatCommandPlugin {
 
             sendResponse(bot, senderId, groupId, responseMsg);
 
-            // 触发聊天完成事件，扣除CA代币
-            eventPublisher.publishEvent(new ChatCompletedEvent(this, user, conversation, cost, question, aiResponse));
+            // 从API响应中获取token使用量
+            ChatResponse chatResponse = null;
+            Integer promptTokens = null;
+            Integer completionTokens = null;
+            Integer totalTokens = null;
+            
+            // 尝试从aiChatService获取ChatResponse对象，以获取token使用信息
+            if (aiChatService.getLastResponse() != null) {
+                chatResponse = aiChatService.getLastResponse();
+                if (chatResponse.getMetadata() != null && chatResponse.getMetadata().getUsage() != null) {
+                    Usage usage = chatResponse.getMetadata().getUsage();
+                    promptTokens = usage.getPromptTokens();
+                    completionTokens = usage.getCompletionTokens();
+                    totalTokens = usage.getTotalTokens();
+                }
+            }
+
+            // 触发聊天完成事件，扣除CA代币，并传递token使用量
+            eventPublisher.publishEvent(new ChatCompletedEvent(this, user, conversation, cost, question, aiResponse, 
+                    promptTokens, completionTokens, totalTokens));
 
         } catch (Exception e) {
             log.error("处理聊天请求时出错", e);

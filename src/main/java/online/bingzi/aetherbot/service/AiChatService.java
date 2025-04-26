@@ -2,6 +2,7 @@ package online.bingzi.aetherbot.service;
 
 import online.bingzi.aetherbot.entity.AiModel;
 import online.bingzi.aetherbot.entity.Message;
+import org.springframework.ai.chat.model.ChatResponse;
 
 import java.util.List;
 
@@ -20,4 +21,11 @@ public interface AiChatService {
      * @return AI的回复内容
      */
     String chat(AiModel model, String question, List<Message> history);
+    
+    /**
+     * 获取最后一次ChatResponse对象，用于提取token使用量等元数据
+     *
+     * @return 最后一次的ChatResponse对象，如果不存在则返回null
+     */
+    ChatResponse getLastResponse();
 } 

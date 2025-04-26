@@ -154,6 +154,20 @@ public class HistoryCommandPlugin {
                     msgBuilder.text(index + ". 模型: " + conversation.getAiModel().getName() + "\n")
                             .text("   时间: " + conversation.getCreateTime().format(FORMATTER) + "\n")
                             .text("   花费: " + String.format("%.9f", displayCost) + " CA\n");
+                            
+                    // 获取对话中的消息并查找token数量
+                    List<Message> messages = messageRepository.findByConversationOrderByCreateTimeAsc(conversation);
+                    if (!messages.isEmpty()) {
+                        // 计算总token数
+                        int totalTokens = messages.stream()
+                                .filter(m -> m.getTokenCount() != null)
+                                .mapToInt(Message::getTokenCount)
+                                .sum();
+                                
+                        if (totalTokens > 0) {
+                            msgBuilder.text("   Token: " + totalTokens + "\n");
+                        }
+                    }
 
                     // 如果不是最后一个对话，则添加分隔线
                     if (index < fromIndex + pageConversations.size()) {
