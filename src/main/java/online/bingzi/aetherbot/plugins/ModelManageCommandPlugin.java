@@ -34,10 +34,10 @@ public class ModelManageCommandPlugin {
 
     /**
      * 处理私聊添加模型指令
-     * 格式: @addmodel [模型名称] [每千Token费用] [描述]
+     * 格式: @addmodel [模型名称] [提问每千Token费用] [回答每千Token费用] [描述]
      */
     @PrivateMessageHandler
-    @MessageHandlerFilter(cmd = "^@addmodel\\s+([\\w-]+)\\s+([0-9]+(\\.[0-9]+)?)(?:\\s+(.+))?$")
+    @MessageHandlerFilter(cmd = "^@addmodel\\s+([\\w-]+)\\s+([0-9]+(\\.[0-9]+)?)\\s+([0-9]+(\\.[0-9]+)?)(?:\\s+(.+))?$")
     public void handlePrivateAddModel(Bot bot, PrivateMessageEvent event, Matcher matcher) {
         String qq = String.valueOf(event.getUserId());
         processAddModelRequest(bot, qq, matcher, event.getUserId(), null);
@@ -45,10 +45,10 @@ public class ModelManageCommandPlugin {
 
     /**
      * 处理群聊添加模型指令
-     * 格式: @addmodel [模型名称] [每千Token费用] [描述]
+     * 格式: @addmodel [模型名称] [提问每千Token费用] [回答每千Token费用] [描述]
      */
     @GroupMessageHandler
-    @MessageHandlerFilter(cmd = "^@addmodel\\s+([\\w-]+)\\s+([0-9]+(\\.[0-9]+)?)(?:\\s+(.+))?$")
+    @MessageHandlerFilter(cmd = "^@addmodel\\s+([\\w-]+)\\s+([0-9]+(\\.[0-9]+)?)\\s+([0-9]+(\\.[0-9]+)?)(?:\\s+(.+))?$")
     public void handleGroupAddModel(Bot bot, GroupMessageEvent event, Matcher matcher) {
         String qq = String.valueOf(event.getUserId());
         processAddModelRequest(bot, qq, matcher, event.getUserId(), event.getGroupId());
@@ -93,19 +93,26 @@ public class ModelManageCommandPlugin {
 
             // 解析参数
             String modelName = matcher.group(1);
-            double costPerThousandTokens = Double.parseDouble(matcher.group(2));
-            String description = matcher.groupCount() >= 4 && matcher.group(4) != null
-                    ? matcher.group(4).trim() : "";
+            double promptCostPerThousandTokens = Double.parseDouble(matcher.group(2));
+            double completionCostPerThousandTokens = Double.parseDouble(matcher.group(4));
+            String description = matcher.groupCount() >= 6 && matcher.group(6) != null
+                    ? matcher.group(6).trim() : "";
 
             // 创建新模型
-            AiModel newModel = aiModelService.createModel(modelName, costPerThousandTokens, description);
+            AiModel newModel = aiModelService.createModel(
+                    modelName,
+                    promptCostPerThousandTokens,
+                    completionCostPerThousandTokens,
+                    description);
 
             // 构建成功消息
             String successMsg = MsgUtils.builder()
                     .text("模型添加成功！\n")
                     .text("==================\n")
                     .text("名称: " + newModel.getName() + "\n")
-                    .text("费用: " + newModel.getCostPerRequest() + " CA/次\n")
+                    .text("提问费用: " + newModel.getPromptCostPerThousandTokens() + " CA/千Token\n")
+                    .text("回答费用: " + newModel.getCompletionCostPerThousandTokens() + " CA/千Token\n")
+                    .text("合计费用: " + String.format("%.9f", newModel.getCostPerRequest()) + " CA/次\n")
                     .text("描述: " + (newModel.getDescription() != null ? newModel.getDescription() : "无"))
                     .build();
 

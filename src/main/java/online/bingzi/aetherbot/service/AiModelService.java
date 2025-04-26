@@ -32,12 +32,14 @@ public interface AiModelService {
     /**
      * 创建新AI模型
      *
-     * @param name                  模型名称
-     * @param costPerThousandTokens 每千Token的CA费用
-     * @param description           模型描述
+     * @param name                            模型名称
+     * @param promptCostPerThousandTokens     每千提问Token的CA费用
+     * @param completionCostPerThousandTokens 每千回答Token的CA费用
+     * @param description                     模型描述
      * @return 创建的AI模型实体
      */
-    AiModel createModel(String name, Double costPerThousandTokens, String description);
+    AiModel createModel(String name, Double promptCostPerThousandTokens,
+                        Double completionCostPerThousandTokens, String description);
 
     /**
      * 更新AI模型状态

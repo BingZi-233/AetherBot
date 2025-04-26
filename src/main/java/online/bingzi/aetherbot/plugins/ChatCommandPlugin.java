@@ -14,6 +14,7 @@ import online.bingzi.aetherbot.entity.Conversation;
 import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.events.ChatCompletedEvent;
+import online.bingzi.aetherbot.events.ChatErrorEvent;
 import online.bingzi.aetherbot.service.AiChatService;
 import online.bingzi.aetherbot.service.AiModelService;
 import online.bingzi.aetherbot.service.ConversationService;
@@ -84,16 +85,19 @@ public class ChatCommandPlugin {
      */
     private void processChatRequest(Bot bot, String qq, String input,
                                     long senderId, Long groupId) {
+        User user = null;
+        Conversation conversation = null;
+        String question = null;
+
         try {
             // 查找用户，如果不存在则创建
-            User user = userService.findByQQ(qq);
+            user = userService.findByQQ(qq);
 
             // 检查是否有活跃对话
-            Conversation conversation = conversationService.getActiveConversation(user);
+            conversation = conversationService.getActiveConversation(user);
 
             // 解析输入内容
             AiModel model;
-            String question;
 
             if (conversation == null) {
                 // 没有活跃对话，需要指定模型名称
@@ -162,11 +166,18 @@ public class ChatCommandPlugin {
 
         } catch (Exception e) {
             log.error("处理聊天请求时出错", e);
-            String errorMsg = MsgUtils.builder()
-                    .text("处理请求时发生错误: " + e.getMessage())
-                    .build();
+            String errorMsg = "处理请求时发生错误: " + e.getMessage();
 
-            sendResponse(bot, senderId, groupId, errorMsg);
+            // 发送错误消息回复
+            String formattedErrorMsg = MsgUtils.builder()
+                    .text(errorMsg)
+                    .build();
+            sendResponse(bot, senderId, groupId, formattedErrorMsg);
+
+            // 如果已经创建了对话和用户，发布错误事件
+            if (user != null && conversation != null && question != null) {
+                eventPublisher.publishEvent(new ChatErrorEvent(this, user, conversation, question, errorMsg));
+            }
         }
     }
 

@@ -79,8 +79,8 @@ public class HelpCommandPlugin {
 
         // 添加模型管理相关命令
         addCommand("addmodel", "添加AI模型",
-                "添加新的AI模型到系统中，只有管理员可以使用此命令。",
-                "@addmodel [模型名称] [每千Token费用] [可选描述]",
+                "添加新的AI模型到系统中，区分提问Token和回答Token的费用，只有管理员可以使用此命令。",
+                "@addmodel [模型名称] [提问每千Token费用] [回答每千Token费用] [可选描述]",
                 true, "系统功能");
 
         addCommand("modelstatus", "更新模型状态",

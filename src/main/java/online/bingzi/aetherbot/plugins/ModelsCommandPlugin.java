@@ -73,8 +73,11 @@ public class ModelsCommandPlugin {
                 for (int i = 0; i < models.size(); i++) {
                     AiModel model = models.get(i);
 
-                    msgBuilder.text("■ " + model.getName() + "\n")
-                            .text("  费用: " + model.getCostPerRequest() + " CA/次\n");
+                    msgBuilder.text("■ " + model.getName() + "\n");
+
+                    // 显示Token费用信息
+                    msgBuilder.text("  提问费用: " + model.getPromptCostPerThousandTokens() + " CA/千Token\n")
+                            .text("  回答费用: " + model.getCompletionCostPerThousandTokens() + " CA/千Token\n");
 
                     if (model.getDescription() != null && !model.getDescription().isEmpty()) {
                         msgBuilder.text("  描述: " + model.getDescription() + "\n");

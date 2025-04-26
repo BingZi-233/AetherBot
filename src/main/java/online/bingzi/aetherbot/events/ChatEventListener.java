@@ -59,6 +59,48 @@ public class ChatEventListener {
     }
 
     /**
+     * 处理聊天错误事件
+     *
+     * @param event 聊天错误事件
+     */
+    @EventListener
+    @Transactional
+    public void handleChatErrorEvent(ChatErrorEvent event) {
+        log.info("处理聊天错误事件: {}", event);
+
+        // 获取事件相关信息
+        User user = event.getUser();
+        String question = event.getQuestion();
+        String errorMessage = event.getErrorMessage();
+
+        try {
+            // 保存用户问题（标记为错误）
+            Message userMessage = new Message();
+            userMessage.setUser(user);
+            userMessage.setConversation(event.getConversation());
+            userMessage.setContent(question);
+            userMessage.setType(MessageType.USER);
+            userMessage.setIsError(true);
+            userMessage.setCreateTime(LocalDateTime.now());
+            messageRepository.save(userMessage);
+
+            // 保存错误回复（标记为错误）
+            Message errorResponseMessage = new Message();
+            errorResponseMessage.setUser(user);
+            errorResponseMessage.setConversation(event.getConversation());
+            errorResponseMessage.setContent(errorMessage);
+            errorResponseMessage.setType(MessageType.AI);
+            errorResponseMessage.setIsError(true);
+            errorResponseMessage.setCreateTime(LocalDateTime.now());
+            messageRepository.save(errorResponseMessage);
+
+            log.info("聊天错误事件处理完成，用户：{}，已记录错误但不计算CA消费", user.getQq());
+        } catch (Exception e) {
+            log.error("处理聊天错误事件时出错", e);
+        }
+    }
+
+    /**
      * 保存用户问题和AI回答消息
      */
     private void saveMessages(User user, ChatCompletedEvent event) {

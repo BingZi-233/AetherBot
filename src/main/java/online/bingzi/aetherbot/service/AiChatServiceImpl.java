@@ -7,8 +7,6 @@ import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.enums.MessageType;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
 
@@ -30,19 +28,19 @@ public class AiChatServiceImpl implements AiChatService {
     @Override
     public String chat(AiModel model, String question, List<Message> history) {
         log.info("处理聊天请求 - 模型: {}, 问题: {}, 历史记录数: {}", model.getName(), question, history.size());
-        
+
         try {
             // 创建ChatClient实例
             ChatClient chatClient = chatClientBuilder
                     .defaultSystem("你是一个友好、专业的AI助手。请提供简洁、准确和有帮助的回答。")
                     .build();
-            
+
             // 准备聊天提示构建器
             var promptBuilder = chatClient.prompt();
-            
+
             // 添加历史消息到消息列表
             List<org.springframework.ai.chat.messages.Message> messages = new ArrayList<>();
-            
+
             // 添加历史消息
             if (!history.isEmpty()) {
                 for (Message msg : history) {
@@ -54,25 +52,25 @@ public class AiChatServiceImpl implements AiChatService {
                     }
                 }
             }
-            
+
             // 添加当前用户问题
             promptBuilder = promptBuilder.user(question);
-            
+
             // 设置模型选项（如果有特定模型名称）
             if (model != null && model.getName() != null && !model.getName().isEmpty()) {
                 promptBuilder = promptBuilder.options(
-                    OpenAiChatOptions.builder()
-                        .model(model.getName())
-                        .build()
+                        OpenAiChatOptions.builder()
+                                .model(model.getName())
+                                .build()
                 );
             }
-            
+
             // 调用API获取响应
             log.debug("发送请求到OpenAI API, 模型: {}", model.getName());
             String aiResponse = promptBuilder.call().content();
-            
+
             log.debug("收到AI回复: {}", aiResponse);
-            
+
             return aiResponse;
         } catch (Exception e) {
             log.error("生成AI回复时出错", e);

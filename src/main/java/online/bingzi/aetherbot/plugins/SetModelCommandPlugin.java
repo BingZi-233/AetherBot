@@ -100,12 +100,14 @@ public class SetModelCommandPlugin {
             Conversation newConversation = conversationService.createConversation(user, model);
 
             // 发送成功消息
-            String successMsg = MsgUtils.builder()
+            MsgUtils msgBuilder = MsgUtils.builder()
                     .text("已成功设置对话模型为: " + model.getName())
-                    .text("\n费用: " + String.format("%.9f", model.getCostPerRequest()) + " CA/次")
-                    .text("\n现在可以直接使用 @chat [问题内容] 进行对话")
-                    .build();
+                    .text("\n提问费用: " + model.getPromptCostPerThousandTokens() + " CA/千Token")
+                    .text("\n回答费用: " + model.getCompletionCostPerThousandTokens() + " CA/千Token")
+                    .text("\n总费用: " + String.format("%.9f", model.getCostPerRequest()) + " CA/次")
+                    .text("\n现在可以直接使用 @chat [问题内容] 进行对话");
 
+            String successMsg = msgBuilder.build();
             sendResponse(bot, senderId, groupId, successMsg);
 
         } catch (Exception e) {

@@ -46,7 +46,8 @@ public class AiModelServiceImpl implements AiModelService {
 
     @Override
     @Transactional
-    public AiModel createModel(String name, Double costPerThousandTokens, String description) {
+    public AiModel createModel(String name, Double promptCostPerThousandTokens,
+                               Double completionCostPerThousandTokens, String description) {
         // 检查模型名称是否已存在
         if (aiModelRepository.findByName(name).isPresent()) {
             throw new IllegalArgumentException("模型名称 '" + name + "' 已存在");
@@ -55,10 +56,12 @@ public class AiModelServiceImpl implements AiModelService {
         // 创建新的模型实体
         AiModel model = new AiModel();
         model.setName(name);
-        model.setCostPerThousandTokens(costPerThousandTokens);
+        // 设置提问和回答的费用
+        model.setPromptCostPerThousandTokens(promptCostPerThousandTokens);
+        model.setCompletionCostPerThousandTokens(completionCostPerThousandTokens);
         model.setDescription(description);
         model.setStatus(ModelStatus.ACTIVE);
-        model.setMultiplier(1.0); // 默认倍率为1.0
+        model.setMultiplier(1.1); // 默认倍率为1.1
         model.setCreateTime(LocalDateTime.now());
         model.setUpdateTime(LocalDateTime.now());
 

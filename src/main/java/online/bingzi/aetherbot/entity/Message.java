@@ -75,6 +75,13 @@ public class Message {
     private Double caCost;
 
     /**
+     * 是否为错误消息
+     */
+    @Column(nullable = false)
+    @Comment("是否为异常消息")
+    private Boolean isError = false;
+
+    /**
      * 创建时间
      */
     @Column(nullable = false)

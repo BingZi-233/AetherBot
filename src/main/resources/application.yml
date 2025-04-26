@@ -24,7 +24,7 @@ aether:
   admin:
     # 管理员QQ列表，多个QQ号用逗号分隔
     qq-list:
-      - "123456789" # 替换为实际管理员QQ号
+      - "1354218038" # 替换为实际管理员QQ号
 
 shiro:
   limiter:

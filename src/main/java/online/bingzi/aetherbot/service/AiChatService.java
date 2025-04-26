@@ -10,11 +10,11 @@ import java.util.List;
  * 负责处理与AI模型的聊天通信
  */
 public interface AiChatService {
-    
+
     /**
      * 向AI模型发送聊天请求
      *
-     * @param model   使用的AI模型
+     * @param model    使用的AI模型
      * @param question 当前问题
      * @param history  对话历史记录
      * @return AI的回复内容
