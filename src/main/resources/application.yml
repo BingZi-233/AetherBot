@@ -14,7 +14,6 @@ spring:
     openai:
       api-key: ${OPENAI_API_KEY:your_api_key_here}
       base-url: ${OPENAI_BASE_URL:https://api.openai.com}
-      model: gpt-3.5-turbo
 
 server:
   servlet:
@@ -25,4 +24,13 @@ aether:
   admin:
     # 管理员QQ列表，多个QQ号用逗号分隔
     qq-list:
-      - "123456789" # 替换为实际管理员QQ号 
+      - "123456789" # 替换为实际管理员QQ号
+
+shiro:
+  limiter:
+    enable: true
+  ws:
+    access-token: ${SHIRO_ACCESS_TOKEN}
+    client:
+      enable: true
+      url: ${SHIRO_WS_URL}
