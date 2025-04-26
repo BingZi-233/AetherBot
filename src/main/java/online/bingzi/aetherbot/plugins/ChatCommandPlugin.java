@@ -14,6 +14,7 @@ import online.bingzi.aetherbot.entity.Conversation;
 import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.events.ChatCompletedEvent;
+import online.bingzi.aetherbot.service.AiChatService;
 import online.bingzi.aetherbot.service.AiModelService;
 import online.bingzi.aetherbot.service.ConversationService;
 import online.bingzi.aetherbot.service.UserService;
@@ -31,15 +32,18 @@ public class ChatCommandPlugin {
     private final UserService userService;
     private final ConversationService conversationService;
     private final AiModelService aiModelService;
+    private final AiChatService aiChatService;
     private final ApplicationEventPublisher eventPublisher;
 
     public ChatCommandPlugin(UserService userService,
                              ConversationService conversationService,
                              AiModelService aiModelService,
+                             AiChatService aiChatService,
                              ApplicationEventPublisher eventPublisher) {
         this.userService = userService;
         this.conversationService = conversationService;
         this.aiModelService = aiModelService;
+        this.aiChatService = aiChatService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -143,20 +147,8 @@ public class ChatCommandPlugin {
             // 获取对话历史作为上下文
             List<Message> history = conversationService.getConversationMessages(conversation);
 
-            // TODO: 调用AI服务处理问题，传入历史消息作为上下文
-            // 这里简化处理，实际应该调用AI服务API
-            StringBuilder context = new StringBuilder();
-            if (!history.isEmpty()) {
-                // 构建对话历史上下文
-                context.append("历史对话：\n");
-                for (Message msg : history) {
-                    String role = msg.getType().name();
-                    context.append(role).append(": ").append(msg.getContent()).append("\n");
-                }
-                context.append("\n");
-            }
-
-            String aiResponse = "这是一个AI回复示例。上下文: " + context + " 问题是：" + question;
+            // 调用AI服务处理问题，传入模型、问题和历史消息作为上下文
+            String aiResponse = aiChatService.chat(model, question, history);
 
             // 发送回复
             String responseMsg = MsgUtils.builder()
