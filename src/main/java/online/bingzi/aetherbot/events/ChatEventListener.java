@@ -14,6 +14,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 /**
@@ -41,7 +43,7 @@ public class ChatEventListener {
 
         // 获取事件相关信息
         User user = event.getUser();
-        double cost = event.getCost();
+        BigDecimal cost = event.getCost();
         String question = event.getQuestion();
         String answer = event.getAnswer();
 
@@ -131,11 +133,16 @@ public class ChatEventListener {
         
         // 计算并设置CA消费（如果可能）
         if (event.getCompletionTokens() != null && event.getConversation().getAiModel() != null) {
-            double completionCostPerThousandTokens = event.getConversation().getAiModel().getCompletionCostPerThousandTokens();
-            double multiplier = event.getConversation().getAiModel().getMultiplier();
-            double tokenCount = event.getCompletionTokens();
-            double caCost = (completionCostPerThousandTokens * tokenCount / 1000) * multiplier;
-            aiMessage.setCaCost(caCost);
+            BigDecimal completionCostPerThousandTokens = event.getConversation().getAiModel().getCompletionCostPerThousandTokens();
+            BigDecimal multiplier = event.getConversation().getAiModel().getMultiplier();
+            BigDecimal tokenCount = new BigDecimal(event.getCompletionTokens());
+            BigDecimal divisor = new BigDecimal("1000");
+            
+            BigDecimal caCost = completionCostPerThousandTokens.multiply(tokenCount)
+                .divide(divisor, 9, RoundingMode.HALF_UP)
+                .multiply(multiplier);
+                
+            aiMessage.setCaCost(caCost.doubleValue());
         }
         
         messageRepository.save(aiMessage);
@@ -144,9 +151,9 @@ public class ChatEventListener {
     /**
      * 扣除CA代币并记录交易
      */
-    private void deductCa(User user, double cost, ChatCompletedEvent event) {
+    private void deductCa(User user, BigDecimal cost, ChatCompletedEvent event) {
         // 计算基于实际Token消耗的CA费用
-        double actualCost = cost; // 默认使用预估费用
+        BigDecimal actualCost = cost; // 默认使用预估费用
 
         // 如果存在真实的Token消耗信息，则重新计算费用
         if (event.getPromptTokens() != null && event.getCompletionTokens() != null &&
@@ -157,18 +164,19 @@ public class ChatEventListener {
                     event.getPromptTokens(), event.getCompletionTokens());
             
             log.debug("基于实际Token的费用计算 - 提问Token: {}, 回答Token: {}, 预估费用: {}, 实际费用: {}", 
-                    event.getPromptTokens(), event.getCompletionTokens(), cost, actualCost);
+                    event.getPromptTokens(), event.getCompletionTokens(), 
+                    cost.toPlainString(), actualCost.toPlainString());
         } else {
             log.debug("使用预估费用 - 未获取到真实Token消耗信息");
         }
 
         // 扣除CA代币
-        userService.updateCaBalance(user, -actualCost);
+        userService.updateCaBalance(user, actualCost.negate());
 
         // 记录CA交易
         CaTransaction transaction = new CaTransaction();
         transaction.setUser(user);
-        transaction.setAmount(-actualCost);
+        transaction.setAmount(actualCost.negate().doubleValue());
         transaction.setType(TransactionType.CONSUME);
         
         // 添加token使用量到交易描述中（如果有）
@@ -185,6 +193,6 @@ public class ChatEventListener {
         
         // 记录实际消费信息
         log.info("聊天消费完成 - 用户: {}, 预估费用: {} CA, 实际费用: {} CA, Token总量: {}", 
-                user.getQq(), cost, actualCost, event.getTotalTokens());
+                user.getQq(), cost.toPlainString(), actualCost.toPlainString(), event.getTotalTokens());
     }
 } 

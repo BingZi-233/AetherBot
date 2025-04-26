@@ -3,6 +3,8 @@ package online.bingzi.aetherbot.service;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.enums.UserRole;
 
+import java.math.BigDecimal;
+
 public interface UserService {
 
     /**
@@ -20,7 +22,7 @@ public interface UserService {
      * @param amount 变动金额（正数为增加，负数为减少）
      * @return 更新后的用户实体
      */
-    User updateCaBalance(User user, double amount);
+    User updateCaBalance(User user, BigDecimal amount);
 
     /**
      * 检查用户是否为管理员

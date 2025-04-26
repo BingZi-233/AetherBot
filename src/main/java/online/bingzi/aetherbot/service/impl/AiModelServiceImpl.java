@@ -9,6 +9,7 @@ import online.bingzi.aetherbot.service.AiModelService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,14 +42,14 @@ public class AiModelServiceImpl implements AiModelService {
         }
 
         return models.stream()
-                .map(model -> model.getName() + " (消耗: " + String.format("%.9f", model.getCostPerRequest()) + " CA)")
+                .map(model -> model.getName() + " (消耗: " + model.getCostPerRequest().toPlainString() + " CA)")
                 .collect(Collectors.joining("\n"));
     }
 
     @Override
     @Transactional
-    public AiModel createModel(String name, Double promptCostPerThousandTokens,
-                               Double completionCostPerThousandTokens, String description) {
+    public AiModel createModel(String name, BigDecimal promptCostPerThousandTokens,
+                               BigDecimal completionCostPerThousandTokens, String description) {
         // 检查模型名称是否已存在
         if (aiModelRepository.findByName(name).isPresent()) {
             throw new IllegalArgumentException("模型名称 '" + name + "' 已存在");
@@ -62,7 +63,7 @@ public class AiModelServiceImpl implements AiModelService {
         model.setCompletionCostPerThousandTokens(completionCostPerThousandTokens);
         model.setDescription(description);
         model.setStatus(ModelStatus.ACTIVE);
-        model.setMultiplier(1.1); // 默认倍率为1.1
+        model.setMultiplier(new BigDecimal("1.1")); // 默认倍率为1.1
         model.setCreateTime(LocalDateTime.now());
         model.setUpdateTime(LocalDateTime.now());
 

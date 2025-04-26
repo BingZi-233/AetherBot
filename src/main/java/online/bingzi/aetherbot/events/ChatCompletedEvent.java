@@ -5,11 +5,13 @@ import online.bingzi.aetherbot.entity.Conversation;
 import online.bingzi.aetherbot.entity.User;
 import org.springframework.context.ApplicationEvent;
 
+import java.math.BigDecimal;
+
 @Getter
 public class ChatCompletedEvent extends ApplicationEvent {
     private final User user;
     private final Conversation conversation;
-    private final double cost;
+    private final BigDecimal cost;
     private final String question;
     private final String answer;
     
@@ -18,7 +20,7 @@ public class ChatCompletedEvent extends ApplicationEvent {
     private final Integer completionTokens;
     private final Integer totalTokens;
 
-    public ChatCompletedEvent(Object source, User user, Conversation conversation, double cost, String question, String answer,
+    public ChatCompletedEvent(Object source, User user, Conversation conversation, BigDecimal cost, String question, String answer,
                              Integer promptTokens, Integer completionTokens, Integer totalTokens) {
         super(source);
         this.user = user;
@@ -33,6 +35,6 @@ public class ChatCompletedEvent extends ApplicationEvent {
     
     // 为向后兼容保留旧构造函数
     public ChatCompletedEvent(Object source, User user, Conversation conversation, double cost, String question, String answer) {
-        this(source, user, conversation, cost, question, answer, null, null, null);
+        this(source, user, conversation, new BigDecimal(String.valueOf(cost)), question, answer, null, null, null);
     }
 } 

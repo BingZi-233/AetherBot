@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.ai.chat.metadata.Usage;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -138,12 +139,14 @@ public class ChatCommandPlugin {
             }
 
             // 检查用户余额
-            double cost = model.getCostPerRequest();
-            if (user.getCaBalance() < cost) {
+            BigDecimal cost = model.getCostPerRequest();
+            BigDecimal userBalance = new BigDecimal(String.valueOf(user.getCaBalance()));
+            
+            if (userBalance.compareTo(cost) < 0) {
                 String errorMsg = MsgUtils.builder()
                         .text("CA代币余额不足！")
-                        .text("\n当前余额: " + String.format("%.9f", user.getCaBalance()))
-                        .text("\n本次需要: " + String.format("%.9f", cost))
+                        .text("\n当前余额: " + userBalance.toPlainString())
+                        .text("\n本次需要: " + cost.toPlainString())
                         .build();
 
                 sendResponse(bot, senderId, groupId, errorMsg);

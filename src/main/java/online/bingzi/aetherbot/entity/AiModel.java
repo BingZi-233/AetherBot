@@ -43,21 +43,21 @@ public class AiModel {
      */
     @Column(nullable = false)
     @Comment("每千提问Token的CA费用")
-    private Double promptCostPerThousandTokens;
+    private BigDecimal promptCostPerThousandTokens;
 
     /**
      * 每千回答Token的CA费用
      */
     @Column(nullable = false)
     @Comment("每千回答Token的CA费用")
-    private Double completionCostPerThousandTokens;
+    private BigDecimal completionCostPerThousandTokens;
 
     /**
      * 费用倍率
      */
     @Column(nullable = false)
     @Comment("费用倍率，默认1.1")
-    private Double multiplier = 1.1;
+    private BigDecimal multiplier = new BigDecimal("1.1");
 
     /**
      * 模型描述
@@ -94,31 +94,28 @@ public class AiModel {
      *
      * @return 每次请求的成本
      */
-    public Double getCostPerRequest() {
+    public BigDecimal getCostPerRequest() {
         // 假设一次请求使用的提问Token和回答Token的分布比例
         int estimatedPromptTokens = 500;     // 提问Token估计值
         int estimatedCompletionTokens = 1500; // 回答Token估计值
 
         // 使用BigDecimal进行精确计算
-        BigDecimal promptCost = new BigDecimal(promptCostPerThousandTokens.toString());
-        BigDecimal completionCost = new BigDecimal(completionCostPerThousandTokens.toString());
         BigDecimal promptTokens = new BigDecimal(estimatedPromptTokens);
         BigDecimal completionTokens = new BigDecimal(estimatedCompletionTokens);
         BigDecimal divisor = new BigDecimal("1000");
-        BigDecimal multiplierValue = new BigDecimal(multiplier.toString());
 
         // 计算提问部分费用: (promptCostPerThousandTokens * estimatedPromptTokens / 1000)
-        BigDecimal promptResult = promptCost.multiply(promptTokens)
+        BigDecimal promptResult = promptCostPerThousandTokens.multiply(promptTokens)
                 .divide(divisor, 9, RoundingMode.HALF_UP);
 
         // 计算回答部分费用: (completionCostPerThousandTokens * estimatedCompletionTokens / 1000)
-        BigDecimal completionResult = completionCost.multiply(completionTokens)
+        BigDecimal completionResult = completionCostPerThousandTokens.multiply(completionTokens)
                 .divide(divisor, 9, RoundingMode.HALF_UP);
 
         // 合并两部分费用并应用倍率: (promptResult + completionResult) * multiplier
-        BigDecimal totalResult = promptResult.add(completionResult).multiply(multiplierValue);
+        BigDecimal totalResult = promptResult.add(completionResult).multiply(multiplier);
 
-        return totalResult.doubleValue();
+        return totalResult;
     }
     
     /**
@@ -128,31 +125,28 @@ public class AiModel {
      * @param completionTokens 回答Token数量
      * @return 实际请求成本
      */
-    public Double calculateActualCost(Integer promptTokens, Integer completionTokens) {
+    public BigDecimal calculateActualCost(Integer promptTokens, Integer completionTokens) {
         if (promptTokens == null || completionTokens == null) {
             // 如果没有实际Token信息，则返回预估费用
             return getCostPerRequest();
         }
         
         // 使用BigDecimal进行精确计算
-        BigDecimal promptCost = new BigDecimal(promptCostPerThousandTokens.toString());
-        BigDecimal completionCost = new BigDecimal(completionCostPerThousandTokens.toString());
-        BigDecimal promptTokensValue = new BigDecimal(promptTokens.toString());
-        BigDecimal completionTokensValue = new BigDecimal(completionTokens.toString());
+        BigDecimal promptTokensValue = new BigDecimal(promptTokens);
+        BigDecimal completionTokensValue = new BigDecimal(completionTokens);
         BigDecimal divisor = new BigDecimal("1000");
-        BigDecimal multiplierValue = new BigDecimal(multiplier.toString());
 
         // 计算提问部分费用: (promptCostPerThousandTokens * promptTokens / 1000)
-        BigDecimal promptResult = promptCost.multiply(promptTokensValue)
+        BigDecimal promptResult = promptCostPerThousandTokens.multiply(promptTokensValue)
                 .divide(divisor, 9, RoundingMode.HALF_UP);
 
         // 计算回答部分费用: (completionCostPerThousandTokens * completionTokens / 1000)
-        BigDecimal completionResult = completionCost.multiply(completionTokensValue)
+        BigDecimal completionResult = completionCostPerThousandTokens.multiply(completionTokensValue)
                 .divide(divisor, 9, RoundingMode.HALF_UP);
 
         // 合并两部分费用并应用倍率: (promptResult + completionResult) * multiplier
-        BigDecimal totalResult = promptResult.add(completionResult).multiply(multiplierValue);
+        BigDecimal totalResult = promptResult.add(completionResult).multiply(multiplier);
 
-        return totalResult.doubleValue();
+        return totalResult;
     }
 } 

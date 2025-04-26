@@ -11,6 +11,7 @@ import online.bingzi.aetherbot.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -30,8 +31,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateCaBalance(User user, double amount) {
-        user.setCaBalance(user.getCaBalance() + amount);
+    public User updateCaBalance(User user, BigDecimal amount) {
+        BigDecimal currentBalance = new BigDecimal(String.valueOf(user.getCaBalance()));
+        BigDecimal newBalance = currentBalance.add(amount);
+        user.setCaBalance(newBalance.doubleValue());
         user.setUpdateTime(LocalDateTime.now());
         return userRepository.save(user);
     }
