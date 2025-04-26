@@ -100,6 +100,17 @@ public class HelpCommandPlugin {
                 "查看所有可用的命令或特定命令的详细帮助信息。", 
                 "@help 或 @help [命令名]", 
                 false, "系统功能");
+        
+        // 添加模型管理相关命令
+        addCommand("addmodel", "添加AI模型", 
+                "添加新的AI模型到系统中，只有管理员可以使用此命令。", 
+                "@addmodel [模型名称] [每千Token费用] [可选描述]", 
+                true, "系统功能");
+
+        addCommand("modelstatus", "更新模型状态", 
+                "更新指定AI模型的状态（启用/禁用），只有管理员可以使用此命令。", 
+                "@modelstatus [模型名称] [ACTIVE|DISABLED]", 
+                true, "系统功能");
     }
 
     /**

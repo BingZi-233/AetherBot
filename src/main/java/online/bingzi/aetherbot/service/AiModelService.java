@@ -1,6 +1,7 @@
 package online.bingzi.aetherbot.service;
 
 import online.bingzi.aetherbot.entity.AiModel;
+import online.bingzi.aetherbot.enums.ModelStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,4 +29,23 @@ public interface AiModelService {
      * @return 格式化的模型名称字符串
      */
     String getAvailableModelsAsString();
+    
+    /**
+     * 创建新AI模型
+     * 
+     * @param name 模型名称
+     * @param costPerThousandTokens 每千Token的CA费用
+     * @param description 模型描述
+     * @return 创建的AI模型实体
+     */
+    AiModel createModel(String name, Double costPerThousandTokens, String description);
+
+    /**
+     * 更新AI模型状态
+     * 
+     * @param name 模型名称
+     * @param status 新状态
+     * @return 更新后的AI模型实体，如果模型不存在则返回null
+     */
+    AiModel updateModelStatus(String name, ModelStatus status);
 } 
