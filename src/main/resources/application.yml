@@ -15,7 +15,7 @@ spring:
       api-key: ${OPENAI_API_KEY}
       base-url: ${OPENAI_BASE_URL}
     retry:
-      max-attempts: 0
+      max-attempts: 1
 
 # Aether机器人配置
 aether:
