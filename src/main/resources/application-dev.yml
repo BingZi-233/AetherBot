@@ -26,7 +26,4 @@ server:
 
 logging:
   level:
-    root: info
     online.bingzi.aetherbot: debug
-    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
