@@ -103,31 +103,56 @@ public class ChatCommandPlugin {
             AiModel model;
 
             if (conversation == null) {
-                // 没有活跃对话，需要指定模型名称
+                // 没有活跃对话，检查是否指定了模型名称
                 String[] parts = input.trim().split("\\s+", 2);
+                
+                // 尝试获取用户的默认模型
+                AiModel defaultModel = userService.getDefaultAiModel(user);
+                
                 if (parts.length < 2) {
-                    String errorMsg = MsgUtils.builder()
-                            .text("格式错误，请使用 @chat [模型名称] [问题内容] 开始新对话。")
-                            .build();
+                    // 输入中只有问题内容，没有指定模型名称
+                    if (defaultModel != null) {
+                        // 有默认模型，使用默认模型
+                        model = defaultModel;
+                        question = input;
+                    } else {
+                        // 没有默认模型，返回错误信息
+                        String errorMsg = MsgUtils.builder()
+                                .text("您尚未设置默认模型，请使用以下格式开始新对话：")
+                                .text("\n@chat [模型名称] [问题内容]")
+                                .text("\n或者先使用@setmodel [模型名称]设置默认模型。")
+                                .text("\n可用模型: ")
+                                .text(aiModelService.getAvailableModelsAsString())
+                                .build();
 
-                    sendResponse(bot, senderId, groupId, errorMsg);
-                    return;
-                }
+                        sendResponse(bot, senderId, groupId, errorMsg);
+                        return;
+                    }
+                } else {
+                    // 输入中包含了可能的模型名称和问题内容
+                    String modelName = parts[0];
+                    question = parts[1];
 
-                String modelName = parts[0];
-                question = parts[1];
+                    // 查找AI模型
+                    model = aiModelService.findByName(modelName);
+                    if (model == null) {
+                        // 如果指定的模型不存在，可能整个输入都是问题内容
+                        if (defaultModel != null) {
+                            // 有默认模型，使用默认模型，并将全部输入视为问题
+                            model = defaultModel;
+                            question = input;
+                        } else {
+                            // 没有默认模型，返回错误信息
+                            String errorMsg = MsgUtils.builder()
+                                    .text("未找到指定的模型: " + modelName)
+                                    .text("\n可用模型: ")
+                                    .text(aiModelService.getAvailableModelsAsString())
+                                    .build();
 
-                // 查找AI模型
-                model = aiModelService.findByName(modelName);
-                if (model == null) {
-                    String errorMsg = MsgUtils.builder()
-                            .text("未找到指定的模型: " + modelName)
-                            .text("\n可用模型: ")
-                            .text(aiModelService.getAvailableModelsAsString())
-                            .build();
-
-                    sendResponse(bot, senderId, groupId, errorMsg);
-                    return;
+                            sendResponse(bot, senderId, groupId, errorMsg);
+                            return;
+                        }
+                    }
                 }
 
                 // 创建新的对话

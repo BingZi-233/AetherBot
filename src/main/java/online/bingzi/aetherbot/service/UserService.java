@@ -2,6 +2,7 @@ package online.bingzi.aetherbot.service;
 
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.enums.UserRole;
+import online.bingzi.aetherbot.entity.AiModel;
 
 import java.math.BigDecimal;
 
@@ -40,4 +41,21 @@ public interface UserService {
      * @return 更新后的用户实体
      */
     User setUserRole(User user, UserRole role);
+
+    /**
+     * 设置用户默认AI模型
+     *
+     * @param user  用户实体
+     * @param model AI模型
+     * @return 更新后的用户实体
+     */
+    User setDefaultAiModel(User user, AiModel model);
+
+    /**
+     * 获取用户默认AI模型
+     *
+     * @param user 用户实体
+     * @return 默认AI模型，如果未设置则返回null
+     */
+    AiModel getDefaultAiModel(User user);
 } 

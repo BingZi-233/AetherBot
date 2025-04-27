@@ -90,6 +90,9 @@ public class SetModelCommandPlugin {
                 return;
             }
 
+            // 设置为用户的默认模型
+            userService.setDefaultAiModel(user, model);
+
             // 结束用户当前的活跃对话(如果有)
             Conversation activeConversation = conversationService.getActiveConversation(user);
             if (activeConversation != null) {
@@ -102,6 +105,7 @@ public class SetModelCommandPlugin {
             // 发送成功消息
             MsgUtils msgBuilder = MsgUtils.builder()
                     .text("已成功设置对话模型为: " + model.getName())
+                    .text("\n此模型已设为您的默认模型")
                     .text("\n提问费用: " + model.getPromptCostPerThousandTokens() + " CA/千Token")
                     .text("\n回答费用: " + model.getCompletionCostPerThousandTokens() + " CA/千Token")
                     .text("\n总费用: " + String.format("%.9f", model.getCostPerRequest()) + " CA/次")

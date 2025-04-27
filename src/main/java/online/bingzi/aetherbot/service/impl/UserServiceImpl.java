@@ -3,6 +3,7 @@ package online.bingzi.aetherbot.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.bingzi.aetherbot.config.AdminProperties;
+import online.bingzi.aetherbot.entity.AiModel;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.enums.UserRole;
 import online.bingzi.aetherbot.enums.UserStatus;
@@ -61,6 +62,21 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
         log.info("已更新用户角色: {}, 角色: {}", user.getQq(), role);
         return savedUser;
+    }
+
+    @Override
+    @Transactional
+    public User setDefaultAiModel(User user, AiModel model) {
+        user.setDefaultAiModel(model);
+        user.setUpdateTime(LocalDateTime.now());
+        User savedUser = userRepository.save(user);
+        log.info("已设置用户默认AI模型: {}, 模型: {}", user.getQq(), model.getName());
+        return savedUser;
+    }
+
+    @Override
+    public AiModel getDefaultAiModel(User user) {
+        return user.getDefaultAiModel();
     }
 
     /**

@@ -69,6 +69,14 @@ public class User {
     private UserRole role = UserRole.USER;
 
     /**
+     * 默认AI模型
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "default_ai_model_id")
+    @Comment("用户默认的AI模型")
+    private AiModel defaultAiModel;
+
+    /**
      * 创建时间
      */
     @Column(nullable = false)
