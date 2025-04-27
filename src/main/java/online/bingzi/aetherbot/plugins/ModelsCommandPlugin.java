@@ -28,10 +28,9 @@ import java.util.regex.Matcher;
 @RequiredArgsConstructor
 public class ModelsCommandPlugin {
 
-    private final AiModelService aiModelService;
-    
     // 每页显示的模型数量
     private static final int PAGE_SIZE = 5;
+    private final AiModelService aiModelService;
 
     /**
      * 处理私聊模型列表查询指令
@@ -49,9 +48,9 @@ public class ModelsCommandPlugin {
                 // 忽略无效页码，使用默认值1
             }
         }
-        
+
         if (page < 1) page = 1;
-        
+
         // 处理模型列表查询请求
         processModelsRequest(bot, event.getUserId(), null, page);
     }
@@ -72,9 +71,9 @@ public class ModelsCommandPlugin {
                 // 忽略无效页码，使用默认值1
             }
         }
-        
+
         if (page < 1) page = 1;
-        
+
         // 处理模型列表查询请求
         processModelsRequest(bot, event.getUserId(), event.getGroupId(), page);
     }
@@ -139,20 +138,20 @@ public class ModelsCommandPlugin {
 
                 // 添加分页提示和使用说明
                 msgBuilder.text("\n");
-                
+
                 // 如果有多个页面，显示分页导航提示
                 if (totalPages > 1) {
                     if (page > 1) {
                         msgBuilder.text("◀ 上一页: @models " + (page - 1) + "\n");
                     }
-                    
+
                     if (page < totalPages) {
                         msgBuilder.text("▶ 下一页: @models " + (page + 1) + "\n");
                     }
-                    
+
                     msgBuilder.text("\n");
                 }
-                
+
                 // 添加使用说明
                 msgBuilder.text("使用方法: @chat [模型名称] [问题内容]");
             }

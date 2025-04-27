@@ -21,7 +21,7 @@ public interface AiChatService {
      * @return AI的回复内容
      */
     String chat(AiModel model, String question, List<Message> history);
-    
+
     /**
      * 获取最后一次ChatResponse对象，用于提取token使用量等元数据
      *

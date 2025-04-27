@@ -117,11 +117,11 @@ public class AiModel {
 
         return totalResult;
     }
-    
+
     /**
      * 基于实际Token消耗计算请求成本
      *
-     * @param promptTokens 提问Token数量
+     * @param promptTokens     提问Token数量
      * @param completionTokens 回答Token数量
      * @return 实际请求成本
      */
@@ -130,7 +130,7 @@ public class AiModel {
             // 如果没有实际Token信息，则返回预估费用
             return getCostPerRequest();
         }
-        
+
         // 使用BigDecimal进行精确计算
         BigDecimal promptTokensValue = new BigDecimal(promptTokens);
         BigDecimal completionTokensValue = new BigDecimal(completionTokens);

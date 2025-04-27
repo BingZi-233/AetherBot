@@ -19,10 +19,10 @@ import online.bingzi.aetherbot.service.AiChatService;
 import online.bingzi.aetherbot.service.AiModelService;
 import online.bingzi.aetherbot.service.ConversationService;
 import online.bingzi.aetherbot.service.UserService;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.ai.chat.metadata.Usage;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -141,7 +141,7 @@ public class ChatCommandPlugin {
             // 检查用户余额
             BigDecimal cost = model.getCostPerRequest();
             BigDecimal userBalance = new BigDecimal(String.valueOf(user.getCaBalance()));
-            
+
             if (userBalance.compareTo(cost) < 0) {
                 String errorMsg = MsgUtils.builder()
                         .text("CA代币余额不足！")
@@ -171,7 +171,7 @@ public class ChatCommandPlugin {
             Integer promptTokens = null;
             Integer completionTokens = null;
             Integer totalTokens = null;
-            
+
             // 尝试从aiChatService获取ChatResponse对象，以获取token使用信息
             if (aiChatService.getLastResponse() != null) {
                 chatResponse = aiChatService.getLastResponse();
@@ -184,7 +184,7 @@ public class ChatCommandPlugin {
             }
 
             // 触发聊天完成事件，扣除CA代币，并传递token使用量
-            eventPublisher.publishEvent(new ChatCompletedEvent(this, user, conversation, cost, question, aiResponse, 
+            eventPublisher.publishEvent(new ChatCompletedEvent(this, user, conversation, cost, question, aiResponse,
                     promptTokens, completionTokens, totalTokens));
 
         } catch (Exception e) {

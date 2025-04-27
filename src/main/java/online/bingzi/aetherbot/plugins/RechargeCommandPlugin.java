@@ -126,7 +126,7 @@ public class RechargeCommandPlugin {
 
             // 记录旧余额用于显示
             BigDecimal oldBalance = targetUser.getCaBalance();
-            
+
             // 进行充值
             targetUser = userService.updateCaBalance(targetUser, amount);
 

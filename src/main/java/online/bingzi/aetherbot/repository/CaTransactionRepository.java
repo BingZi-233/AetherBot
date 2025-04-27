@@ -19,7 +19,7 @@ public interface CaTransactionRepository extends JpaRepository<CaTransaction, UU
      * @return CA交易记录列表
      */
     List<CaTransaction> findByUserOrderByCreateTimeDesc(User user);
-    
+
     /**
      * 查询与特定对话关联的交易记录
      *

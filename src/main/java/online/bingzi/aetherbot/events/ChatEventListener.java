@@ -110,12 +110,12 @@ public class ChatEventListener {
         userMessage.setContent(event.getQuestion());
         userMessage.setType(MessageType.USER);
         userMessage.setCreateTime(LocalDateTime.now());
-        
+
         // 设置提问token数量（如果有）
         if (event.getPromptTokens() != null) {
             userMessage.setTokenCount(event.getPromptTokens());
         }
-        
+
         messageRepository.save(userMessage);
 
         // 保存AI回答
@@ -125,26 +125,26 @@ public class ChatEventListener {
         aiMessage.setContent(event.getAnswer());
         aiMessage.setType(MessageType.AI);
         aiMessage.setCreateTime(LocalDateTime.now());
-        
+
         // 设置回答token数量（如果有）
         if (event.getCompletionTokens() != null) {
             aiMessage.setTokenCount(event.getCompletionTokens());
         }
-        
+
         // 计算并设置CA消费（如果可能）
         if (event.getCompletionTokens() != null && event.getConversation().getAiModel() != null) {
             BigDecimal completionCostPerThousandTokens = event.getConversation().getAiModel().getCompletionCostPerThousandTokens();
             BigDecimal multiplier = event.getConversation().getAiModel().getMultiplier();
             BigDecimal tokenCount = new BigDecimal(event.getCompletionTokens());
             BigDecimal divisor = new BigDecimal("1000");
-            
+
             BigDecimal caCost = completionCostPerThousandTokens.multiply(tokenCount)
-                .divide(divisor, 9, RoundingMode.HALF_UP)
-                .multiply(multiplier);
-                
+                    .divide(divisor, 9, RoundingMode.HALF_UP)
+                    .multiply(multiplier);
+
             aiMessage.setCaCost(caCost);
         }
-        
+
         messageRepository.save(aiMessage);
     }
 
@@ -158,13 +158,13 @@ public class ChatEventListener {
         // 如果存在真实的Token消耗信息，则重新计算费用
         if (event.getPromptTokens() != null && event.getCompletionTokens() != null &&
             event.getConversation().getAiModel() != null) {
-            
+
             // 使用AiModel的calculateActualCost方法计算实际费用
             actualCost = event.getConversation().getAiModel().calculateActualCost(
                     event.getPromptTokens(), event.getCompletionTokens());
-            
-            log.debug("基于实际Token的费用计算 - 提问Token: {}, 回答Token: {}, 预估费用: {}, 实际费用: {}", 
-                    event.getPromptTokens(), event.getCompletionTokens(), 
+
+            log.debug("基于实际Token的费用计算 - 提问Token: {}, 回答Token: {}, 预估费用: {}, 实际费用: {}",
+                    event.getPromptTokens(), event.getCompletionTokens(),
                     cost.toPlainString(), actualCost.toPlainString());
         } else {
             log.debug("使用预估费用 - 未获取到真实Token消耗信息");
@@ -178,21 +178,21 @@ public class ChatEventListener {
         transaction.setUser(user);
         transaction.setAmount(actualCost.negate());
         transaction.setType(TransactionType.CONSUME);
-        
+
         // 添加token使用量到交易描述中（如果有）
         if (event.getTotalTokens() != null) {
-            transaction.setDescription("聊天消费 - 使用模型: " + event.getConversation().getAiModel().getName() + 
-                    ", 使用Token: " + event.getTotalTokens());
+            transaction.setDescription("聊天消费 - 使用模型: " + event.getConversation().getAiModel().getName() +
+                                       ", 使用Token: " + event.getTotalTokens());
         } else {
             transaction.setDescription("聊天消费 - 使用模型: " + event.getConversation().getAiModel().getName());
         }
-        
+
         transaction.setRelatedConversation(event.getConversation());
         transaction.setCreateTime(LocalDateTime.now());
         caTransactionRepository.save(transaction);
-        
+
         // 记录实际消费信息
-        log.info("聊天消费完成 - 用户: {}, 预估费用: {} CA, 实际费用: {} CA, Token总量: {}", 
+        log.info("聊天消费完成 - 用户: {}, 预估费用: {} CA, 实际费用: {} CA, Token总量: {}",
                 user.getQq(), cost.toPlainString(), actualCost.toPlainString(), event.getTotalTokens());
     }
 } 

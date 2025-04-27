@@ -14,7 +14,6 @@ import online.bingzi.aetherbot.entity.CaTransaction;
 import online.bingzi.aetherbot.entity.Conversation;
 import online.bingzi.aetherbot.entity.Message;
 import online.bingzi.aetherbot.entity.User;
-import online.bingzi.aetherbot.enums.MessageType;
 import online.bingzi.aetherbot.repository.CaTransactionRepository;
 import online.bingzi.aetherbot.repository.ConversationRepository;
 import online.bingzi.aetherbot.repository.MessageRepository;
@@ -24,9 +23,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -155,7 +152,7 @@ public class HistoryCommandPlugin {
                     msgBuilder.text(index + ". 模型: " + conversation.getAiModel().getName() + "\n")
                             .text("   时间: " + conversation.getCreateTime().format(FORMATTER) + "\n")
                             .text("   花费: " + String.format("%.9f", displayCost) + " CA\n");
-                            
+
                     // 获取对话中的消息并查找token数量
                     List<Message> messages = messageRepository.findByConversationOrderByCreateTimeAsc(conversation);
                     if (!messages.isEmpty()) {
@@ -164,7 +161,7 @@ public class HistoryCommandPlugin {
                                 .filter(m -> m.getTokenCount() != null)
                                 .mapToInt(Message::getTokenCount)
                                 .sum();
-                                
+
                         if (totalTokens > 0) {
                             msgBuilder.text("   Token: " + totalTokens + "\n");
                         }

@@ -87,6 +87,11 @@ public class HelpCommandPlugin {
                 "更新指定AI模型的状态（启用/禁用），只有管理员可以使用此命令。",
                 "@modelstatus [模型名称] [ACTIVE|DISABLED]",
                 true, "系统功能");
+
+        addCommand("shutdown", "关闭系统",
+                "安全地关闭SpringBoot应用程序，需要确认码以防误操作，只有管理员可以使用此命令。",
+                "@shutdown confirm",
+                true, "系统功能");
     }
 
     /**
