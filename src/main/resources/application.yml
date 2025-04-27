@@ -12,12 +12,8 @@ spring:
   # OpenAI配置
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:your_api_key_here}
-      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
-
-server:
-  servlet:
-    context-path: /api
+      api-key: ${OPENAI_API_KEY}
+      base-url: ${OPENAI_BASE_URL}
     
 # Aether机器人配置
 aether:
@@ -27,8 +23,6 @@ aether:
       - "1354218038" # 替换为实际管理员QQ号
 
 shiro:
-  limiter:
-    enable: true
   ws:
     access-token: ${SHIRO_ACCESS_TOKEN}
     client:
