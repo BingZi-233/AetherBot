@@ -124,7 +124,8 @@ public class ModelsCommandPlugin {
 
                     // 显示Token费用信息
                     msgBuilder.text("  提问费用: " + model.getPromptCostPerThousandTokens() + " CA/千Token\n")
-                            .text("  回答费用: " + model.getCompletionCostPerThousandTokens() + " CA/千Token\n");
+                            .text("  回答费用: " + model.getCompletionCostPerThousandTokens() + " CA/千Token\n")
+                            .text("  费用倍率: " + model.getMultiplier() + "\n");
 
                     if (model.getDescription() != null && !model.getDescription().isEmpty()) {
                         msgBuilder.text("  描述: " + model.getDescription() + "\n");
