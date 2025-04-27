@@ -56,6 +56,11 @@ public class HelpCommandPlugin {
                 "首次对话: @chat [模型名称] [问题内容]\n继续对话: @chat [问题内容]",
                 false, "对话功能");
 
+        addCommand("setmodel", "设置对话模型",
+                "设置当前会话使用的AI模型。\n使用此命令后，可以直接用@chat进行对话，无需每次指定模型。",
+                "@setmodel [模型名称]",
+                false, "对话功能");
+
         addCommand("end", "结束当前对话",
                 "结束当前正在进行的对话会话。",
                 "@end",
