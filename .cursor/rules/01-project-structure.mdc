@@ -1,0 +1,58 @@
+---
+description: 此文件提供了AetherBot项目的整体结构和关键组件概览，帮助开发者快速了解项目架构、主要文件和技术栈。通过阅读本文件，您可以掌握项目的核心模块组织和功能分布。
+globs: 
+alwaysApply: false
+---
+# AetherBot 项目结构指南
+
+> 此文件提供了AetherBot项目的整体结构和关键组件概览，帮助开发者快速了解项目架构、主要文件和技术栈。通过阅读本文件，您可以掌握项目的核心模块组织和功能分布。
+
+## 项目概述
+
+AetherBot 是一个基于 Spring Boot 开发的 QQ 机器人应用，主要功能围绕 AI 聊天服务实现。项目使用 [Shiro](mdc:src/main/java/online/bingzi/aetherbot/plugins/ChatCommandPlugin.java) 框架与 QQ 通信，并集成了 Spring AI 与 OpenAI 模型进行交互。
+
+## 主要组件
+
+### 核心入口
+- [AetherBotApplication.java](mdc:src/main/java/online/bingzi/aetherbot/AetherBotApplication.java) - Spring Boot 应用入口
+
+### 配置文件
+- [application.yml](mdc:src/main/resources/application.yml) - 主配置文件
+- [application-dev.yml](mdc:src/main/resources/application-dev.yml) - 开发环境配置
+
+### 实体类
+- [User.java](mdc:src/main/java/online/bingzi/aetherbot/entity/User.java) - 用户实体
+- [AiModel.java](mdc:src/main/java/online/bingzi/aetherbot/entity/AiModel.java) - AI模型实体
+- [Conversation.java](mdc:src/main/java/online/bingzi/aetherbot/entity/Conversation.java) - 会话实体
+- [Message.java](mdc:src/main/java/online/bingzi/aetherbot/entity/Message.java) - 消息实体
+- [CaTransaction.java](mdc:src/main/java/online/bingzi/aetherbot/entity/CaTransaction.java) - 交易记录实体
+
+### 服务接口
+- [UserService.java](mdc:src/main/java/online/bingzi/aetherbot/service/UserService.java) - 用户服务接口
+- [AiChatService.java](mdc:src/main/java/online/bingzi/aetherbot/service/AiChatService.java) - AI聊天服务接口
+- [AiModelService.java](mdc:src/main/java/online/bingzi/aetherbot/service/AiModelService.java) - AI模型服务接口
+- [ConversationService.java](mdc:src/main/java/online/bingzi/aetherbot/service/ConversationService.java) - 会话服务接口
+
+### 插件命令模块
+- [ChatCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/ChatCommandPlugin.java) - 聊天命令插件
+- [HelpCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/HelpCommandPlugin.java) - 帮助命令插件
+- [ModelsCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/ModelsCommandPlugin.java) - 模型列表命令插件
+- [SetModelCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/SetModelCommandPlugin.java) - 设置模型命令插件
+- [ShutdownCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/ShutdownCommandPlugin.java) - 关闭命令插件
+- [BalanceCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/BalanceCommandPlugin.java) - 余额查询命令插件
+- [RechargeCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/RechargeCommandPlugin.java) - 充值命令插件
+
+## 技术栈
+
+- **核心框架**: Spring Boot 3.4.5
+- **JDK版本**: Java 21
+- **数据库访问**: Spring Data JPA
+- **数据库**: MySQL
+- **QQ通信**: Shiro 2.4.0
+- **AI集成**: Spring AI (OpenAI)
+- **环境配置**: Spring DotEnv
+- **日志处理**: Spring Boot默认 (Logback)
+- **代码简化**: Lombok
+
+
+

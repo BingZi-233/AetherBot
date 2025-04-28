@@ -1,0 +1,156 @@
+---
+description: 此文件详细介绍了AetherBot项目的插件系统架构和命令处理机制，为开发者提供了插件开发的完整流程和最佳实践。通过学习本文档，您可以了解如何创建新的命令插件、实现命令处理逻辑，以及与现有系统集成，从而扩展机器人的功能。
+globs: 
+alwaysApply: false
+---
+# AetherBot 插件系统指南
+
+> 此文件详细介绍了AetherBot项目的插件系统架构和命令处理机制，为开发者提供了插件开发的完整流程和最佳实践。通过学习本文档，您可以了解如何创建新的命令插件、实现命令处理逻辑，以及与现有系统集成，从而扩展机器人的功能。
+
+## 插件系统概述
+
+AetherBot 采用基于 [Shiro](mdc:src/main/java/online/bingzi/aetherbot/plugins/ChatCommandPlugin.java) 框架的插件系统，通过注解驱动的方式处理 QQ 消息命令。每个命令功能被实现为独立的插件类，使系统具有良好的可扩展性和维护性。
+
+## 插件开发流程
+
+### 1. 创建新的插件类
+
+在 `src/main/java/online/bingzi/aetherbot/plugins` 目录下创建新的插件类，命名规则为 `[功能名]CommandPlugin.java`。例如：
+
+```java
+@Shiro
+@Component
+@Slf4j
+@RequiredArgsConstructor
+public class NewFeatureCommandPlugin {
+    // 插件实现代码
+}
+```
+
+### 2. 定义消息处理方法
+
+使用 Shiro 框架的注解定义消息处理方法，支持私聊和群聊消息处理：
+
+```java
+@PrivateMessageHandler
+@MessageHandlerFilter(cmd = "^@command(?:\\s+(.+))?$")
+public void handlePrivateCommand(Bot bot, PrivateMessageEvent event, Matcher matcher) {
+    // 处理私聊命令
+}
+
+@GroupMessageHandler
+@MessageHandlerFilter(cmd = "^@command(?:\\s+(.+))?$")
+public void handleGroupCommand(Bot bot, GroupMessageEvent event, Matcher matcher) {
+    // 处理群聊命令
+}
+```
+
+### 3. 实现命令处理逻辑
+
+按照单一职责原则，实现命令的处理逻辑：
+
+```java
+private void processCommand(Bot bot, String qq, String parameter, long senderId, Long groupId) {
+    // 实现命令处理逻辑
+    // 使用服务层完成业务处理
+    // 发送响应消息
+}
+```
+
+### 4. 发送响应消息
+
+使用 Shiro 框架提供的 API 发送响应消息：
+
+```java
+private void sendResponse(Bot bot, long senderId, Long groupId, String message) {
+    if (groupId != null) {
+        // 群聊回复，添加@用户
+        String atMsg = MsgUtils.builder()
+                .at(senderId)
+                .text("\n")
+                .text(message)
+                .build();
+        bot.sendGroupMsg(groupId, atMsg, false);
+    } else {
+        // 私聊回复
+        bot.sendPrivateMsg(senderId, message, false);
+    }
+}
+```
+
+## 常见插件模式
+
+### 1. 管理员命令模式
+
+限制只有管理员可以执行的命令，通过 `AdminProperties` 检查权限：
+
+```java
+@Autowired
+private AdminProperties adminProperties;
+
+private void processCommand(Bot bot, String qq, String parameter, long senderId, Long groupId) {
+    // 检查是否是管理员
+    if (!adminProperties.isAdmin(qq)) {
+        sendResponse(bot, senderId, groupId, "您没有执行此命令的权限");
+        return;
+    }
+    
+    // 执行管理员专属命令
+}
+```
+
+### 2. 用户命令模式
+
+处理普通用户的命令，结合用户服务完成业务逻辑：
+
+```java
+@Autowired
+private UserService userService;
+
+private void processCommand(Bot bot, String qq, String parameter, long senderId, Long groupId) {
+    // 获取或创建用户
+    User user = userService.getOrCreateUser(qq);
+    
+    // 执行用户相关命令
+}
+```
+
+### 3. AI聊天命令模式
+
+结合 AI 服务实现聊天功能：
+
+```java
+@Autowired
+private AiChatService aiChatService;
+@Autowired
+private ConversationService conversationService;
+
+private void processChat(Bot bot, String qq, String message, long senderId, Long groupId) {
+    // 获取用户会话
+    Conversation conversation = conversationService.getCurrentConversation(qq);
+    
+    // 调用AI服务获取回复
+    String reply = aiChatService.chat(conversation, message);
+    
+    // 发送回复
+    sendResponse(bot, senderId, groupId, reply);
+}
+```
+
+## 插件命名规范
+
+插件命名应清晰表明其功能，并遵循以下规范：
+
+1. 类名使用 `[功能名]CommandPlugin` 格式
+2. 命令前缀使用 `@` 开始，如 `@help`、`@chat`
+3. 命令参数使用正则表达式提取，格式为 `^@command(?:\\s+(.+))?$`
+
+## 现有插件参考
+
+- [ChatCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/ChatCommandPlugin.java) - 处理AI聊天功能
+- [HelpCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/HelpCommandPlugin.java) - 提供帮助信息
+- [SetModelCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/SetModelCommandPlugin.java) - 设置AI模型
+- [ShutdownCommandPlugin.java](mdc:src/main/java/online/bingzi/aetherbot/plugins/ShutdownCommandPlugin.java) - 系统关闭命令
+
+
+
