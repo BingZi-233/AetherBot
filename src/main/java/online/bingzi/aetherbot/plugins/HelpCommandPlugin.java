@@ -76,6 +76,11 @@ public class HelpCommandPlugin {
                 "@models",
                 false, "对话功能");
 
+        addCommand("search-model", "搜索AI模型",
+                "根据关键词搜索匹配的AI模型。\n支持模糊搜索，返回所有包含指定关键词的模型信息。",
+                "@search-model [关键词]",
+                false, "对话功能");
+
         addCommand("history", "查询对话历史",
                 "查询自己的对话历史记录，支持分页查看。",
                 "@history [页码]，默认显示第1页",
