@@ -23,6 +23,8 @@ AetherBot 是一个基于 Spring Boot 和 OpenAI 构建的智能 QQ 机器人，
 - **@defaultmodel**：查询当前默认AI模型
 - **@end**：结束当前对话会话
 - **@models**：查询系统中所有可用的AI模型
+- **@search-model**：搜索匹配关键词的AI模型
+- **@continuous-chat**：开启或关闭持续对话模式（仅私聊有效）
 - **@history**：查询对话历史记录
 
 ### 系统功能
@@ -71,10 +73,10 @@ SERVER_PORT=8080
 ### 构建与运行
 
 ```bash
-# 使用 Maven 包装器构建项目
+# 开发环境构建（包含devtools）
 ./mvnw clean package
 
-# 运行应用
+# 运行开发环境
 java -jar target/AetherBot-0.0.1-SNAPSHOT.jar
 ```
 
@@ -89,15 +91,42 @@ cp .env.prod .env
 # 修改 .env 中的生产环境配置
 ```
 
-2. 使用 Docker 进行部署（可选）：
+2. 使用生产环境配置进行构建（不包含devtools）：
 
 ```bash
-# 构建 Docker 镜像
+# 生产环境构建，激活prod配置文件
+./mvnw clean package -Pprod
+
+# 也可以明确指定spring.profiles.active
+./mvnw clean package -Dspring.profiles.active=prod
+```
+
+3. 运行生产环境应用：
+
+```bash
+# 使用prod配置运行应用
+java -jar target/AetherBot-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+
+4. 使用Docker进行部署（可选）：
+
+```bash
+# 构建Docker镜像（推荐在Dockerfile中设置prod配置）
 docker build -t aetherbot .
 
 # 运行容器
-docker run -d -p 8080:8080 --env-file .env --name aetherbot aetherbot
+docker run -d -p 80:80 --env-file .env --name aetherbot aetherbot
 ```
+
+### 生产环境安全配置
+
+在生产环境中，我们已经：
+
+1. 禁用了Spring Boot Devtools，减少内存占用并提高安全性
+2. 优化了连接池配置，适应生产环境高并发场景
+3. 禁用了SQL语句日志显示，提高性能和安全性
+4. 配置了日志系统，确保问题可追溯
+5. 禁用了Hibernate自动更新数据库结构功能
 
 ## 贡献指南
 
