@@ -1,8 +1,8 @@
 package online.bingzi.aetherbot.service;
 
+import online.bingzi.aetherbot.entity.AiModel;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.enums.UserRole;
-import online.bingzi.aetherbot.entity.AiModel;
 
 import java.math.BigDecimal;
 

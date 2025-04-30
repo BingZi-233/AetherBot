@@ -35,7 +35,7 @@ public class DefaultModelCommandPlugin {
     @MessageHandlerFilter(cmd = "^@defaultmodel$")
     public void handlePrivateDefaultModel(Bot bot, PrivateMessageEvent event) {
         String qq = String.valueOf(event.getUserId());
-        
+
         // 处理查询默认模型请求
         processDefaultModelRequest(bot, qq, event.getUserId(), null);
     }
@@ -48,7 +48,7 @@ public class DefaultModelCommandPlugin {
     @MessageHandlerFilter(cmd = "^@defaultmodel$")
     public void handleGroupDefaultModel(Bot bot, GroupMessageEvent event) {
         String qq = String.valueOf(event.getUserId());
-        
+
         // 处理查询默认模型请求
         processDefaultModelRequest(bot, qq, event.getUserId(), event.getGroupId());
     }
@@ -65,12 +65,12 @@ public class DefaultModelCommandPlugin {
         try {
             // 查找用户
             User user = userService.findByQQ(qq);
-            
+
             // 获取默认模型
             AiModel defaultModel = userService.getDefaultAiModel(user);
-            
+
             MsgUtils msgBuilder = MsgUtils.builder();
-            
+
             if (defaultModel != null) {
                 // 有默认模型
                 msgBuilder.text("您当前的默认AI模型是: " + defaultModel.getName())
@@ -84,10 +84,10 @@ public class DefaultModelCommandPlugin {
                         .text("\n请使用 @setmodel [模型名称] 设置默认模型")
                         .text("\n或者使用 @chat [模型名称] [问题内容] 开始对话");
             }
-            
+
             String msg = msgBuilder.build();
             sendResponse(bot, senderId, groupId, msg);
-            
+
         } catch (Exception e) {
             log.error("处理查询默认模型请求时出错", e);
             String errorMsg = MsgUtils.builder()

@@ -77,7 +77,7 @@ public class ModelsCommandPlugin {
         // 处理模型列表查询请求
         processModelsRequest(bot, event.getUserId(), event.getGroupId(), page);
     }
-    
+
     /**
      * 处理私聊模型搜索指令
      * 格式: @search-model 关键词
@@ -90,7 +90,7 @@ public class ModelsCommandPlugin {
         if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
             keyword = matcher.group(1).trim();
         }
-        
+
         // 如果关键词为空，返回错误提示
         if (keyword.isEmpty()) {
             String errorMsg = MsgUtils.builder()
@@ -99,11 +99,11 @@ public class ModelsCommandPlugin {
             sendResponse(bot, event.getUserId(), null, errorMsg);
             return;
         }
-        
+
         // 处理模型搜索请求
         processModelSearchRequest(bot, event.getUserId(), null, keyword);
     }
-    
+
     /**
      * 处理群聊模型搜索指令
      * 格式: @search-model 关键词
@@ -116,7 +116,7 @@ public class ModelsCommandPlugin {
         if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
             keyword = matcher.group(1).trim();
         }
-        
+
         // 如果关键词为空，返回错误提示
         if (keyword.isEmpty()) {
             String errorMsg = MsgUtils.builder()
@@ -125,7 +125,7 @@ public class ModelsCommandPlugin {
             sendResponse(bot, event.getUserId(), event.getGroupId(), errorMsg);
             return;
         }
-        
+
         // 处理模型搜索请求
         processModelSearchRequest(bot, event.getUserId(), event.getGroupId(), keyword);
     }
@@ -220,7 +220,7 @@ public class ModelsCommandPlugin {
             sendResponse(bot, senderId, groupId, errorMsg);
         }
     }
-    
+
     /**
      * 处理模型搜索请求
      *
@@ -233,7 +233,7 @@ public class ModelsCommandPlugin {
         try {
             // 搜索匹配关键词的模型
             List<AiModel> matchedModels = aiModelService.searchModelsByKeyword(keyword);
-            
+
             // 构建搜索结果信息
             MsgUtils msgBuilder = MsgUtils.builder()
                     .text("搜索结果: \"" + keyword + "\"\n")
@@ -244,7 +244,7 @@ public class ModelsCommandPlugin {
                         .text("提示: 尝试使用 @models 命令查看所有可用模型");
             } else {
                 msgBuilder.text("找到 " + matchedModels.size() + " 个匹配模型:\n");
-                
+
                 for (int i = 0; i < matchedModels.size(); i++) {
                     AiModel model = matchedModels.get(i);
 
@@ -264,7 +264,7 @@ public class ModelsCommandPlugin {
                         msgBuilder.text("--------------------\n");
                     }
                 }
-                
+
                 // 添加使用说明
                 msgBuilder.text("\n使用方法: @chat [模型名称] [问题内容]");
             }

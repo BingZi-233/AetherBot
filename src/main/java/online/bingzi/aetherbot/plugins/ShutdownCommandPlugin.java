@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import online.bingzi.aetherbot.entity.User;
 import online.bingzi.aetherbot.service.UserService;
 import org.springframework.boot.SpringApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -33,18 +32,15 @@ import java.util.regex.Matcher;
 @RequiredArgsConstructor
 public class ShutdownCommandPlugin {
 
-    // 用于存储用户确认码的Map: key是用户QQ，value是确认码信息
-    private final Map<String, ConfirmationCode> confirmationCodeMap = new ConcurrentHashMap<>();
-    
     // 确认码有效期（分钟）
     private static final int CODE_VALID_MINUTES = 5;
-    
     // 确认码长度
     private static final int CODE_LENGTH = 6;
-    
+    // 用于存储用户确认码的Map: key是用户QQ，value是确认码信息
+    private final Map<String, ConfirmationCode> confirmationCodeMap = new ConcurrentHashMap<>();
     private final UserService userService;
     private final ConfigurableApplicationContext applicationContext;
-    
+
     // 随机数生成器
     private final Random random = new Random();
 
@@ -106,7 +102,7 @@ public class ShutdownCommandPlugin {
                 sendResponse(bot, senderId, groupId, errorMsg);
                 return;
             }
-            
+
             // 如果没有提供确认码，则生成新的确认码并返回
             if (providedCode.isEmpty()) {
                 String newCode = generateConfirmationCode(qq);
@@ -119,7 +115,7 @@ public class ShutdownCommandPlugin {
                 sendResponse(bot, senderId, groupId, codeMsg);
                 return;
             }
-            
+
             // 验证确认码
             if (!validateConfirmationCode(qq, providedCode)) {
                 String errorMsg = MsgUtils.builder()
@@ -129,7 +125,7 @@ public class ShutdownCommandPlugin {
                 sendResponse(bot, senderId, groupId, errorMsg);
                 return;
             }
-            
+
             // 确认码验证通过，清除该用户的确认码
             confirmationCodeMap.remove(qq);
 
@@ -152,11 +148,11 @@ public class ShutdownCommandPlugin {
                 try {
                     log.info("开始执行关闭程序...");
                     Thread.sleep(1000);
-                    
+
                     // 获取退出码
                     int exitCode = SpringApplication.exit(applicationContext, () -> 0);
                     log.info("Spring应用程序已关闭，退出码: {}", exitCode);
-                    
+
                     // 最后强制关闭JVM
                     log.info("正在退出JVM...");
                     System.exit(exitCode);
@@ -175,7 +171,7 @@ public class ShutdownCommandPlugin {
             sendResponse(bot, senderId, groupId, errorMsg);
         }
     }
-    
+
     /**
      * 生成随机确认码
      *
@@ -186,20 +182,20 @@ public class ShutdownCommandPlugin {
         // 生成由数字和大写字母组成的随机码
         StringBuilder codeBuilder = new StringBuilder();
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 排除容易混淆的字符
-        
+
         for (int i = 0; i < CODE_LENGTH; i++) {
             codeBuilder.append(chars.charAt(random.nextInt(chars.length())));
         }
-        
+
         String code = codeBuilder.toString();
-        
+
         // 存储确认码和生成时间
         ConfirmationCode confirmationCode = new ConfirmationCode(code, LocalDateTime.now());
         confirmationCodeMap.put(qq, confirmationCode);
-        
+
         return code;
     }
-    
+
     /**
      * 验证确认码
      *
@@ -210,13 +206,13 @@ public class ShutdownCommandPlugin {
     private boolean validateConfirmationCode(String qq, String code) {
         // 获取用户的确认码信息
         ConfirmationCode confirmationCode = confirmationCodeMap.get(qq);
-        
+
         // 如果没有找到确认码或确认码已过期，返回false
-        if (confirmationCode == null || 
+        if (confirmationCode == null ||
             confirmationCode.getGeneratedTime().plusMinutes(CODE_VALID_MINUTES).isBefore(LocalDateTime.now())) {
             return false;
         }
-        
+
         // 不区分大小写比较确认码
         return confirmationCode.getCode().equalsIgnoreCase(code);
     }
@@ -243,23 +239,23 @@ public class ShutdownCommandPlugin {
             bot.sendPrivateMsg(senderId, message, false);
         }
     }
-    
+
     /**
      * 确认码信息内部类
      */
     private static class ConfirmationCode {
         private final String code;
         private final LocalDateTime generatedTime;
-        
+
         public ConfirmationCode(String code, LocalDateTime generatedTime) {
             this.code = code;
             this.generatedTime = generatedTime;
         }
-        
+
         public String getCode() {
             return code;
         }
-        
+
         public LocalDateTime getGeneratedTime() {
             return generatedTime;
         }

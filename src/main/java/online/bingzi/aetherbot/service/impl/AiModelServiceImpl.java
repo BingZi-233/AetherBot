@@ -88,7 +88,7 @@ public class AiModelServiceImpl implements AiModelService {
         // 保存更新
         return aiModelRepository.save(model);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<AiModel> searchModelsByKeyword(String keyword) {

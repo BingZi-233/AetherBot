@@ -105,10 +105,10 @@ public class ChatCommandPlugin {
             if (conversation == null) {
                 // 没有活跃对话，检查是否指定了模型名称
                 String[] parts = input.trim().split("\\s+", 2);
-                
+
                 // 尝试获取用户的默认模型
                 AiModel defaultModel = userService.getDefaultAiModel(user);
-                
+
                 if (parts.length < 2) {
                     // 输入中只有问题内容，没有指定模型名称
                     if (defaultModel != null) {
