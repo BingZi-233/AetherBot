@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 定义日志文件的存储位置 -->
+    <property name="LOG_PATH" value="./logs" />
+
+    <!-- 控制台输出 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 文件输出 - latest.log -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/latest.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!-- 日志文件滚动策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 归档的日志文件的名称格式 -->
+            <fileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <!-- 单个文件的最大大小 -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 保留的归档文件的最大数量 -->
+            <maxHistory>60</maxHistory>
+            <!-- 所有归档文件的总大小限制 -->
+            <totalSizeCap>2GB</totalSizeCap>
+            <!-- 强制重启时触发滚动 -->
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 设置日志级别 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+    <!-- 应用程序特定的日志级别 -->
+    <logger name="online.bingzi.aetherbot" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </logger>
+
+    <!-- 根据Spring配置文件中的profile切换日志级别 -->
+    <springProfile name="dev">
+        <logger name="online.bingzi.aetherbot" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="FILE" />
+        </logger>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="online.bingzi.aetherbot" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="FILE" />
+        </logger>
+    </springProfile>
+</configuration> 

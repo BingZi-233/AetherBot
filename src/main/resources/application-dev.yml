@@ -26,4 +26,7 @@ server:
 
 logging:
   level:
-    online.bingzi.aetherbot: debug
+    root: INFO
+    online.bingzi.aetherbot: DEBUG
+  file:
+    path: ./logs

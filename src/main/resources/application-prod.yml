@@ -23,3 +23,10 @@ spring:
 
 server:
   port: 80
+
+logging:
+  level:
+    root: INFO
+    online.bingzi.aetherbot: INFO
+  file:
+    path: ./logs
