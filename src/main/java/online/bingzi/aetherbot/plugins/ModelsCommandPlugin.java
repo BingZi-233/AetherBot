@@ -77,6 +77,58 @@ public class ModelsCommandPlugin {
         // 处理模型列表查询请求
         processModelsRequest(bot, event.getUserId(), event.getGroupId(), page);
     }
+    
+    /**
+     * 处理私聊模型搜索指令
+     * 格式: @search-model 关键词
+     */
+    @PrivateMessageHandler
+    @MessageHandlerFilter(cmd = "^@search-model(?:\\s+(.+))?$")
+    public void handlePrivateSearchModel(Bot bot, PrivateMessageEvent event, Matcher matcher) {
+        // 提取搜索关键词
+        String keyword = "";
+        if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
+            keyword = matcher.group(1).trim();
+        }
+        
+        // 如果关键词为空，返回错误提示
+        if (keyword.isEmpty()) {
+            String errorMsg = MsgUtils.builder()
+                    .text("请提供搜索关键词，格式: @search-model 关键词")
+                    .build();
+            sendResponse(bot, event.getUserId(), null, errorMsg);
+            return;
+        }
+        
+        // 处理模型搜索请求
+        processModelSearchRequest(bot, event.getUserId(), null, keyword);
+    }
+    
+    /**
+     * 处理群聊模型搜索指令
+     * 格式: @search-model 关键词
+     */
+    @GroupMessageHandler
+    @MessageHandlerFilter(cmd = "^@search-model(?:\\s+(.+))?$")
+    public void handleGroupSearchModel(Bot bot, GroupMessageEvent event, Matcher matcher) {
+        // 提取搜索关键词
+        String keyword = "";
+        if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
+            keyword = matcher.group(1).trim();
+        }
+        
+        // 如果关键词为空，返回错误提示
+        if (keyword.isEmpty()) {
+            String errorMsg = MsgUtils.builder()
+                    .text("请提供搜索关键词，格式: @search-model 关键词")
+                    .build();
+            sendResponse(bot, event.getUserId(), event.getGroupId(), errorMsg);
+            return;
+        }
+        
+        // 处理模型搜索请求
+        processModelSearchRequest(bot, event.getUserId(), event.getGroupId(), keyword);
+    }
 
     /**
      * 处理模型列表查询请求
@@ -163,6 +215,67 @@ public class ModelsCommandPlugin {
             log.error("处理模型列表查询请求时出错", e);
             String errorMsg = MsgUtils.builder()
                     .text("处理模型列表查询请求时发生错误: " + e.getMessage())
+                    .build();
+
+            sendResponse(bot, senderId, groupId, errorMsg);
+        }
+    }
+    
+    /**
+     * 处理模型搜索请求
+     *
+     * @param bot      机器人实例
+     * @param senderId 发送者ID
+     * @param groupId  群ID，如果是私聊则为null
+     * @param keyword  搜索关键词
+     */
+    private void processModelSearchRequest(Bot bot, long senderId, Long groupId, String keyword) {
+        try {
+            // 搜索匹配关键词的模型
+            List<AiModel> matchedModels = aiModelService.searchModelsByKeyword(keyword);
+            
+            // 构建搜索结果信息
+            MsgUtils msgBuilder = MsgUtils.builder()
+                    .text("搜索结果: \"" + keyword + "\"\n")
+                    .text("====================\n");
+
+            if (matchedModels.isEmpty()) {
+                msgBuilder.text("未找到匹配的模型\n")
+                        .text("提示: 尝试使用 @models 命令查看所有可用模型");
+            } else {
+                msgBuilder.text("找到 " + matchedModels.size() + " 个匹配模型:\n");
+                
+                for (int i = 0; i < matchedModels.size(); i++) {
+                    AiModel model = matchedModels.get(i);
+
+                    msgBuilder.text("■ " + model.getName() + "\n");
+
+                    // 显示Token费用信息
+                    msgBuilder.text("  提问费用: " + model.getPromptCostPerThousandTokens() + " CA/千Token\n")
+                            .text("  回答费用: " + model.getCompletionCostPerThousandTokens() + " CA/千Token\n")
+                            .text("  费用倍率: " + model.getMultiplier() + "\n");
+
+                    if (model.getDescription() != null && !model.getDescription().isEmpty()) {
+                        msgBuilder.text("  描述: " + model.getDescription() + "\n");
+                    }
+
+                    // 如果不是最后一个模型，则添加分隔线
+                    if (i < matchedModels.size() - 1) {
+                        msgBuilder.text("--------------------\n");
+                    }
+                }
+                
+                // 添加使用说明
+                msgBuilder.text("\n使用方法: @chat [模型名称] [问题内容]");
+            }
+
+            String searchResult = msgBuilder.build();
+            sendResponse(bot, senderId, groupId, searchResult);
+
+        } catch (Exception e) {
+            log.error("处理模型搜索请求时出错", e);
+            String errorMsg = MsgUtils.builder()
+                    .text("处理模型搜索请求时发生错误: " + e.getMessage())
                     .build();
 
             sendResponse(bot, senderId, groupId, errorMsg);

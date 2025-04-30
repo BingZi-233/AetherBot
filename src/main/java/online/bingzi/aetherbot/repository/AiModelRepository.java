@@ -27,4 +27,13 @@ public interface AiModelRepository extends JpaRepository<AiModel, UUID> {
      * @return 符合状态的模型列表
      */
     List<AiModel> findByStatus(ModelStatus status);
+    
+    /**
+     * 模糊搜索模型名称
+     *
+     * @param keyword 搜索关键词
+     * @param status 模型状态
+     * @return 符合条件的模型列表
+     */
+    List<AiModel> findByNameContainingIgnoreCaseAndStatus(String keyword, ModelStatus status);
 } 

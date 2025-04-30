@@ -50,4 +50,12 @@ public interface AiModelService {
      * @return 更新后的AI模型实体，如果模型不存在则返回null
      */
     AiModel updateModelStatus(String name, ModelStatus status);
+
+    /**
+     * 根据关键词模糊搜索模型
+     *
+     * @param keyword 搜索关键词
+     * @return 匹配的模型列表
+     */
+    List<AiModel> searchModelsByKeyword(String keyword);
 } 

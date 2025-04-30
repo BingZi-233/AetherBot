@@ -88,4 +88,11 @@ public class AiModelServiceImpl implements AiModelService {
         // 保存更新
         return aiModelRepository.save(model);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<AiModel> searchModelsByKeyword(String keyword) {
+        // 使用仓库方法进行模糊搜索，仅搜索激活状态的模型
+        return aiModelRepository.findByNameContainingIgnoreCaseAndStatus(keyword, ModelStatus.ACTIVE);
+    }
 } 
