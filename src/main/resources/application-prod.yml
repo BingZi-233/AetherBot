@@ -20,6 +20,13 @@ spring:
       hibernate:
         format_sql: false
         use_sql_comments: false
+  # 明确禁用devtools
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+    add-properties: false
 
 server:
   port: 80
