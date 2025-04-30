@@ -51,7 +51,7 @@ AetherBot 是一个基于 Spring Boot 和 OpenAI 构建的智能 QQ 机器人，
 
 ### 配置设置
 
-1. 复制 `.env.dev` 为 `.env`，并根据实际情况修改配置：
+1. 复制 `.env.example` 为 `.env`，并根据实际情况修改配置：
 
 ```properties
 # 数据库配置
@@ -63,9 +63,6 @@ DATABASE_PASSWORD=password
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_BASE_URL=https://api.openai.com
 
-# 管理员配置
-ADMIN_QQ_LIST=12345678,87654321
-
 # 其他配置
 SERVER_PORT=8080
 ```
@@ -73,49 +70,11 @@ SERVER_PORT=8080
 ### 构建与运行
 
 ```bash
-# 开发环境构建（包含devtools）
+# 开发环境构建
 ./mvnw clean package
 
 # 运行开发环境
-java -jar target/AetherBot-0.0.1-SNAPSHOT.jar
-```
-
-## 部署
-
-### 生产环境部署
-
-1. 创建生产环境配置文件：
-
-```bash
-cp .env.prod .env
-# 修改 .env 中的生产环境配置
-```
-
-2. 使用生产环境配置进行构建（不包含devtools）：
-
-```bash
-# 生产环境构建，激活prod配置文件
-./mvnw clean package -Pprod
-
-# 也可以明确指定spring.profiles.active
-./mvnw clean package -Dspring.profiles.active=prod
-```
-
-3. 运行生产环境应用：
-
-```bash
-# 使用prod配置运行应用
 java -jar target/AetherBot-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
-```
-
-4. 使用Docker进行部署（可选）：
-
-```bash
-# 构建Docker镜像（推荐在Dockerfile中设置prod配置）
-docker build -t aetherbot .
-
-# 运行容器
-docker run -d -p 80:80 --env-file .env --name aetherbot aetherbot
 ```
 
 ### 生产环境安全配置
