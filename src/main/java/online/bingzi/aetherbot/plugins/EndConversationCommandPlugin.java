@@ -79,16 +79,30 @@ public class EndConversationCommandPlugin {
                 sendResponse(bot, senderId, groupId, msg);
                 return;
             }
+            
+            // 检查是否是私聊，并且用户开启了持续对话模式
+            boolean isContinuousChatEnabled = false;
+            if (groupId == null && userService.isContinuousChatEnabled(user)) {
+                isContinuousChatEnabled = true;
+                // 在私聊环境下，如果用户开启了持续对话模式，则同时关闭持续对话
+                userService.setContinuousChatEnabled(user, false);
+            }
 
             // 结束对话
             conversationService.endConversation(activeConversation);
 
-            String msg = MsgUtils.builder()
+            MsgUtils msgBuilder = MsgUtils.builder()
                     .text("已结束当前对话。\n")
                     .text("对话模型: " + activeConversation.getAiModel().getName() + "\n")
-                    .text("开始时间: " + activeConversation.getCreateTime())
-                    .build();
-
+                    .text("开始时间: " + activeConversation.getCreateTime());
+            
+            // 如果关闭了持续对话模式，添加提示信息
+            if (isContinuousChatEnabled) {
+                msgBuilder.text("\n\n同时已关闭持续对话模式。")
+                          .text("\n现在您需要使用\"@chat [问题内容]\"格式与AI对话");
+            }
+            
+            String msg = msgBuilder.build();
             sendResponse(bot, senderId, groupId, msg);
 
         } catch (Exception e) {

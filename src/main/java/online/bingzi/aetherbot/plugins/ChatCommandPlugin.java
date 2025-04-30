@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Shiro
 @Component
@@ -38,6 +39,9 @@ public class ChatCommandPlugin {
     private final AiModelService aiModelService;
     private final AiChatService aiChatService;
     private final ApplicationEventPublisher eventPublisher;
+    
+    // 命令前缀正则表达式
+    private static final Pattern COMMAND_PREFIX_PATTERN = Pattern.compile("^@\\w+");
 
     public ChatCommandPlugin(UserService userService,
                              ConversationService conversationService,
@@ -81,6 +85,42 @@ public class ChatCommandPlugin {
 
         // 处理聊天请求
         processChatRequest(bot, qq, input, event.getUserId(), event.getGroupId());
+    }
+    
+    /**
+     * 处理私聊持续对话模式下的普通消息
+     * 在持续对话模式下，用户发送的不以@开头的消息都视为对话内容
+     */
+    @PrivateMessageHandler
+    public void handleContinuousChat(Bot bot, PrivateMessageEvent event) {
+        // 获取QQ号和消息内容
+        String qq = String.valueOf(event.getUserId());
+        String message = event.getRawMessage();
+        
+        // 检查消息是否以@开头，如果是则由其他命令处理器处理
+        if (COMMAND_PREFIX_PATTERN.matcher(message).find()) {
+            return;
+        }
+        
+        try {
+            // 查找用户
+            User user = userService.findByQQ(qq);
+            
+            // 检查用户是否开启了持续对话模式
+            if (!userService.isContinuousChatEnabled(user)) {
+                return;
+            }
+            
+            // 处理聊天请求
+            processChatRequest(bot, qq, message, event.getUserId(), null);
+            
+        } catch (Exception e) {
+            log.error("处理持续对话消息时出错", e);
+            String errorMsg = MsgUtils.builder()
+                    .text("处理消息时发生错误: " + e.getMessage())
+                    .build();
+            bot.sendPrivateMsg(event.getUserId(), errorMsg, false);
+        }
     }
 
     /**

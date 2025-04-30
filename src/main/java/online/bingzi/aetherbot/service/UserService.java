@@ -58,4 +58,21 @@ public interface UserService {
      * @return 默认AI模型，如果未设置则返回null
      */
     AiModel getDefaultAiModel(User user);
+
+    /**
+     * 检查用户是否开启了持续对话模式
+     *
+     * @param user 用户实体
+     * @return 是否开启了持续对话模式
+     */
+    boolean isContinuousChatEnabled(User user);
+
+    /**
+     * 设置用户的持续对话模式状态
+     *
+     * @param user    用户实体
+     * @param enabled 是否启用持续对话
+     * @return 更新后的用户实体
+     */
+    User setContinuousChatEnabled(User user, boolean enabled);
 } 

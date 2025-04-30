@@ -77,6 +77,13 @@ public class User {
     private AiModel defaultAiModel;
 
     /**
+     * 是否开启持续对话模式（仅在私聊中有效）
+     */
+    @Column(nullable = false)
+    @Comment("是否开启持续对话模式（仅在私聊中有效）")
+    private boolean continuousChatEnabled = false;
+
+    /**
      * 创建时间
      */
     @Column(nullable = false)

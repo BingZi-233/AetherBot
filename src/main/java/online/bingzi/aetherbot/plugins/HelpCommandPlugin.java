@@ -81,6 +81,11 @@ public class HelpCommandPlugin {
                 "@search-model [关键词]",
                 false, "对话功能");
 
+        addCommand("continuous-chat", "持续对话模式",
+                "开启或关闭持续对话模式。在持续对话模式下，私聊时可以直接发送消息与AI对话，无需添加@chat前缀。\n仅在私聊环境中有效。",
+                "@continuous-chat on [模型名称]\n@continuous-chat off\n@continuous-chat status",
+                false, "对话功能");
+
         addCommand("history", "查询对话历史",
                 "查询自己的对话历史记录，支持分页查看。",
                 "@history [页码]，默认显示第1页",

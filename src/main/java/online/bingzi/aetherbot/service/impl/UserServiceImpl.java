@@ -78,6 +78,24 @@ public class UserServiceImpl implements UserService {
     public AiModel getDefaultAiModel(User user) {
         return user.getDefaultAiModel();
     }
+    
+    @Override
+    public boolean isContinuousChatEnabled(User user) {
+        if (user == null) {
+            return false;
+        }
+        return user.isContinuousChatEnabled();
+    }
+    
+    @Override
+    @Transactional
+    public User setContinuousChatEnabled(User user, boolean enabled) {
+        user.setContinuousChatEnabled(enabled);
+        user.setUpdateTime(LocalDateTime.now());
+        User savedUser = userRepository.save(user);
+        log.info("已{}用户持续对话模式: {}", enabled ? "开启" : "关闭", user.getQq());
+        return savedUser;
+    }
 
     /**
      * 创建新用户
